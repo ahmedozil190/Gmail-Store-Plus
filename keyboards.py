@@ -6,7 +6,7 @@ def get_main_keyboard(lang):
     keyboard = [
         [s['BTN_BUY']],
         [s['BTN_BALANCE'], s['BTN_DEPOSIT']],
-        [InlineKeyboardButton("📱 Open App", web_app={"url": "https://your-domain.com/"})],
+        [InlineKeyboardButton("📱 Open App", web_app={"url": "https://gmail-store-plus-production.up.railway.app/"})],
         [s['BTN_MY_ORDERS'], s['BTN_HELP']],
         [s['BTN_SETTINGS']]
     ]
