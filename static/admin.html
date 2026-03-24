@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Store - Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="section-title" style="margin-bottom:0">🛠 لوحة التحكم</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">الأدمن</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="balance-label">الحسابات</div>
+            <div class="stat-value" id="total-accs">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="balance-label">المبيعات</div>
+            <div class="stat-value" id="total-sales">$0</div>
+        </div>
+    </div>
+
+    <div class="section-title">🕒 طلبات إيداع معلقة</div>
+    <div id="pending-deposits" class="accounts-grid">
+        <div style="text-align: center; color: var(--text-muted); padding: 20px;">لا يوجد طلبات حالياً</div>
+    </div>
+
+    <div class="nav-bar">
+        <a href="#" class="nav-item active">
+            <span class="nav-icon">📊</span>
+            <span>الإحصائيات</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            <span>المتجر</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span>الأعضاء</span>
+        </a>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        async function loadAdminData() {
+            // This will call admin-only routes later
+            // For now, it's a placeholder
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>

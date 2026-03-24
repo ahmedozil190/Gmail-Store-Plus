@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Store - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="user-info">
+            <div class="avatar" id="user-avatar">?</div>
+            <div>
+                <div id="user-name" style="font-weight: 600;">تحميل...</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">مرحباً بك مجدداً</div>
+            </div>
+        </div>
+        <div class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;">نشط</div>
+    </div>
+
+    <div class="balance-card">
+        <div class="balance-label">رصيدك الحالي</div>
+        <div class="balance-amount" id="balance">$0.00</div>
+    </div>
+
+    <div class="section-title">📦 المنتجات المتوفرة</div>
+    <div class="accounts-grid" id="accounts-list">
+        <div class="account-item">
+            <div>
+                <div style="font-weight: 500;">حساب Gmail (تلقائي)</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">$0.50 لكل حساب</div>
+            </div>
+            <button class="buy-btn" onclick="buyOne()">شراء الآن</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <a href="#" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>الرئيسية</span>
+        </a>
+        <a href="orders.html" class="nav-item">
+            <span class="nav-icon">🛍</span>
+            <span>طلباتي</span>
+        </a>
+        <a href="deposit.html" class="nav-item">
+            <span class="nav-icon">💳</span>
+            <span>شحن</span>
+        </a>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Load User Data
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('user-name').innerText = user.first_name;
+            document.getElementById('user-avatar').innerText = user.first_name[0];
+        }
+
+        async function loadAppData() {
+            try {
+                const response = await fetch(`/api/user_data?user_id=${user?.id}`);
+                const data = await response.json();
+                document.getElementById('balance').innerText = `$${data.balance.toFixed(2)}`;
+            } catch (e) {
+                console.error("Failed to load data", e);
+            }
+        }
+
+        function buyOne() {
+            tg.showConfirm("هل تريد شراء حساب واحد؟", (confirmed) => {
+                if (confirmed) {
+                    tg.sendData(JSON.stringify({action: 'buy', qty: 1}));
+                    tg.close();
+                }
+            });
+        }
+
+        loadAppData();
+    </script>
+</body>
+</html>
