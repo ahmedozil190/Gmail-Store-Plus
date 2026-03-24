@@ -93,7 +93,8 @@ def main():
     runner = web.AppRunner(webhook_app)
     loop.run_until_complete(runner.setup())
     
-    port = 8080 # Default port
+    # Use PORT from env (standard for hosting like Railway/Heroku)
+    port = int(os.getenv('PORT', 8080))
     site = web.TCPSite(runner, '0.0.0.0', port)
     loop.run_until_complete(site.start())
     
