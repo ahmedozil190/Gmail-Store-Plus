@@ -2,50 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gmail Store - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gmail Store</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
-        <div class="user-info">
-            <div class="avatar" id="user-avatar">?</div>
-            <div>
-                <div id="user-name" style="font-weight: 600;">تحميل...</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">مرحباً بك مجدداً</div>
+        <div class="user-profile">
+            <div class="avatar-container" id="avatar">?</div>
+            <div class="user-text">
+                <div class="greeting-text">أهلاً بك 👋</div>
+                <div class="user-name" id="user-name">تحميل...</div>
             </div>
         </div>
-        <div class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;">نشط</div>
+        <div class="notification-ring" style="position: relative; font-size: 1.2rem; padding: 10px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+            🔔
+        </div>
     </div>
 
+    <!-- Balance Card -->
     <div class="balance-card">
-        <div class="balance-label">رصيدك الحالي</div>
-        <div class="balance-amount" id="balance">$0.00</div>
+        <div class="label">💰 الرصيد الحالي</div>
+        <div class="amount" id="balance">$0.00</div>
     </div>
 
-    <div class="section-title">📦 المنتجات المتوفرة</div>
-    <div class="accounts-grid" id="accounts-list">
-        <div class="account-item">
-            <div>
-                <div style="font-weight: 500;">حساب Gmail (تلقائي)</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">$0.50 لكل حساب</div>
+    <!-- Featured Products -->
+    <div class="section-header">
+        <div class="section-title">🛒 المنتجات المتاحة</div>
+        <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">عرض الكل</div>
+    </div>
+
+    <div id="products-list">
+        <!-- Single Product Item -->
+        <div class="product-card">
+            <div class="product-info">
+                <h3>حسابات Gmail (بجودة عالية)</h3>
+                <p>سعر الحساب: $0.50</p>
             </div>
-            <button class="buy-btn" onclick="buyOne()">شراء الآن</button>
+            <button class="action-btn" onclick="buyOne()">شراء</button>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <a href="#" class="nav-item active">
-            <span class="nav-icon">🏠</span>
+    <!-- Navigation -->
+    <div class="nav-dock">
+        <a href="#" class="nav-link active">
+            <div class="icon-bg">🏠</div>
             <span>الرئيسية</span>
         </a>
-        <a href="orders.html" class="nav-item">
-            <span class="nav-icon">🛍</span>
+        <a href="#" class="nav-link">
+            <div class="icon-bg">🛍</div>
             <span>طلباتي</span>
         </a>
-        <a href="deposit.html" class="nav-item">
-            <span class="nav-icon">💳</span>
+        <a href="#" class="nav-link">
+            <div class="icon-bg">💳</div>
             <span>شحن</span>
         </a>
     </div>
@@ -53,26 +64,30 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
+        tg.headerColor = '#060a16';
+        tg.backgroundColor = '#060a16';
+
         // Load User Data
         const user = tg.initDataUnsafe.user;
         if (user) {
-            document.getElementById('user-name').innerText = user.first_name;
-            document.getElementById('user-avatar').innerText = user.first_name[0];
+            document.getElementById('user-name').innerText = user.first_name || "مستخدم";
+            document.getElementById('avatar').innerText = (user.first_name || "?")[0].toUpperCase();
         }
 
-        async function loadAppData() {
+        async function loadData() {
             try {
                 const response = await fetch(`/api/user_data?user_id=${user?.id}`);
                 const data = await response.json();
-                document.getElementById('balance').innerText = `$${data.balance.toFixed(2)}`;
+                if (data.balance !== undefined) {
+                    document.getElementById('balance').innerText = `$${data.balance.toFixed(2)}`;
+                }
             } catch (e) {
-                console.error("Failed to load data", e);
+                console.error("Fetch error:", e);
             }
         }
 
         function buyOne() {
-            tg.showConfirm("هل تريد شراء حساب واحد؟", (confirmed) => {
+            tg.showConfirm("هل أنت متأكد من رغبتك في شراء حساب واحد مقابل $0.50؟", (confirmed) => {
                 if (confirmed) {
                     tg.sendData(JSON.stringify({action: 'buy', qty: 1}));
                     tg.close();
@@ -80,7 +95,7 @@
             });
         }
 
-        loadAppData();
+        loadData();
     </script>
 </body>
 </html>

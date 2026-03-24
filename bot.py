@@ -72,6 +72,19 @@ def main():
     print("🚀 GMAIL STORE BOT ACTIVE")
     print("="*40 + "\n")
     
+    # Set Menu Button
+    async def set_menu_btn():
+        await app.bot.set_chat_menu_button(
+            menu_button={
+                "type": "web_app",
+                "text": "📱 Store",
+                "web_app": {"url": "https://gmail-store-plus-production.up.railway.app/"}
+            }
+        )
+    
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(set_menu_btn())
+    
     # ── Start Web Server (Webhooks + MiniApp) ──────────────────────────
     webhook_app = web.Application()
     setup_webhook(webhook_app, app)
