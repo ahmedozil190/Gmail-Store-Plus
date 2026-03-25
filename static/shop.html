@@ -29,17 +29,18 @@
                 </div>
                 
                 <div class="hero-icon-wrapper">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-envelope"></i>
                 </div>
                 
                 <h2 class="hero-title" id="product-name">Gmail Accounts</h2>
                 <p class="hero-subtitle" id="product-desc">High quality accounts with recovery email.</p>
                 
+                <div style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; margin-bottom: 5px;" id="unit-price-label">Price: $0.00 / Account</div>
                 <div class="shop-price-tag" id="total-price">--</div>
                 
                 <div class="qty-selector">
                     <button class="qty-btn" id="minusBtn"><i class="fas fa-minus"></i></button>
-                    <input type="number" class="qty-input" id="qtyInput" value="1" min="1" readonly>
+                    <input type="number" class="qty-input" id="qtyInput" value="1" min="1">
                     <button class="qty-btn" id="plusBtn"><i class="fas fa-plus"></i></button>
                 </div>
 
@@ -111,24 +112,39 @@
                 unitPrice = shopData.price;
                 currentStock = shopData.stock;
 
-                document.getElementById('product-name').innerText = shopData.product_name;
-                document.getElementById('product-desc').innerText = shopData.product_desc;
-                document.getElementById('user-balance').innerText = `$${userData.balance.toFixed(2)}`;
+                document.getElementById('product-name').innerText = shopData.product_name || "Gmail Accounts";
+                document.getElementById('product-desc').innerText = shopData.product_desc || "High quality accounts.";
+                document.getElementById('unit-price-label').innerText = `Price: $${unitPrice.toFixed(2)} / Account`;
+                
+                if (userData && userData.balance !== undefined) {
+                    document.getElementById('user-balance').innerText = `$${userData.balance.toFixed(2)}`;
+                }
                 
                 const badge = document.getElementById('stock-badge');
                 badge.innerText = `${currentStock} In Stock`;
                 if(currentStock < 10) badge.classList.add('low');
 
                 updateTotal();
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('stock-badge').innerText = "Stock Unavailable";
+            }
         }
 
         const qtyInput = document.getElementById('qtyInput');
         function updateTotal() {
-            const qty = parseInt(qtyInput.value);
+            let qty = parseInt(qtyInput.value) || 1;
+            if (qty < 1) qty = 1;
+            if (currentStock > 0 && qty > currentStock) qty = currentStock;
+            qtyInput.value = qty;
+            
             const total = (qty * unitPrice).toFixed(2);
             document.getElementById('total-price').innerText = `$${total}`;
         }
+
+        qtyInput.oninput = () => {
+            updateTotal();
+        };
 
         document.getElementById('plusBtn').onclick = () => {
             let val = parseInt(qtyInput.value);
