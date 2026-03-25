@@ -107,7 +107,7 @@
 
                 <div class="input-group">
                     <label>Deposit Amount ($)</label>
-                    <input type="number" id="amount" class="input-field" placeholder="Enter amount (e.g. 10)" step="1">
+                    <input type="number" id="amount" class="input-field" placeholder="Deposit amount $ (USD)" step="1">
                 </div>
 
                 <div class="calc-result" id="calcBox">
@@ -143,12 +143,13 @@
                 const data = await response.json();
                 if (data.vodafone_number) {
                     document.getElementById('vNumber').innerText = data.vodafone_number;
-                    exchangeRate = data.exchange_rate;
+                    exchangeRate = data.exchange_rate || 52.7;
                     document.getElementById('rateLine').innerText = `1$ = ${exchangeRate.toFixed(2)} EGP`;
                 }
             } catch (e) { 
                 console.error(e);
-                document.getElementById('rateLine').innerText = "Rating system busy...";
+                exchangeRate = 52.70;
+                document.getElementById('rateLine').innerText = `1$ = ${exchangeRate.toFixed(2)} EGP`;
             }
         }
 

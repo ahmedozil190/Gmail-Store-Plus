@@ -10,19 +10,28 @@ _rate_cache = {"rate": 52.7, "last_updated": 0}
 
 async def get_live_rate():
     now = datetime.now().timestamp()
-    if now - _rate_cache["last_updated"] < 3600: # Cache for 1 hour
+    # Cache for 1 hour
+    if now - _rate_cache["last_updated"] < 3600:
         return _rate_cache["rate"]
     
     try:
-        async with aiohttp.ClientSession() as session:
+        # 5 second timeout to prevent hanging the whole API
+        timeout = aiohttp.ClientTimeout(total=5)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get("https://api.exchangerate-api.com/v4/latest/USD") as resp:
-                data = await resp.json()
-                rate = data['rates'].get('EGP', 52.7)
-                _rate_cache["rate"] = rate
-                _rate_cache["last_updated"] = now
-                return rate
-    except:
-        return _rate_cache["rate"]
+                if resp.status == 200:
+                    data = await resp.json()
+                    rate = data['rates'].get('EGP', _rate_cache["rate"])
+                    _rate_cache["rate"] = rate
+                    _rate_cache["last_updated"] = now
+                    print(f"Live Rate Updated: {rate}")
+                    return rate
+                else:
+                    print(f"Rate API returned status {resp.status}")
+    except Exception as e:
+        print(f"Rate Fetch Error: {e}")
+    
+    return _rate_cache["rate"]
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
