@@ -128,16 +128,19 @@
 
         async function loadData() {
             try {
-                const userId = user?.id || 7142953055;
+                const userId = user?.id || 8741285999;
+                console.log("Loading data for user:", userId);
                 const [userRes, historyRes] = await Promise.all([
                     fetch(`/api/user_data?user_id=${userId}`),
                     fetch(`/api/user_deposits?user_id=${userId}`)
                 ]);
                 
                 const userData = await userRes.json();
-                document.getElementById('balance').innerText = userData.balance.toFixed(2);
+                console.log("User data:", userData);
+                document.getElementById('balance').innerText = (userData.balance || 0).toFixed(2);
 
                 const history = await historyRes.json();
+                console.log("History data:", history);
                 renderHistory(history);
             } catch (e) {
                 console.error("Error loading wallet data:", e);
@@ -146,32 +149,40 @@
 
         function renderHistory(items) {
             const list = document.getElementById('historyList');
-            if (items.length === 0) return;
+            if (!Array.isArray(items) || items.length === 0) {
+                console.log("No history to render.");
+                return;
+            }
 
             list.innerHTML = '';
             items.forEach(item => {
-                const isDeposit = item.type === 'deposit';
-                const method = isDeposit ? (item.method || 'Deposit') : 'Account Purchase';
-                const amountPrefix = isDeposit ? '+' : '-';
-                const amountClass = isDeposit ? 'pos' : 'neg';
-                
-                const date = new Date(item.created_at).toLocaleDateString('en-GB', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                });
-                
-                const card = document.createElement('div');
-                card.className = 'history-card';
-                card.innerHTML = `
-                    <div class="history-info">
-                        <span class="history-method">${method}</span>
-                        <span class="history-date">${date}</span>
-                    </div>
-                    <div class="history-right">
-                        <span class="history-amount ${amountClass}">${amountPrefix}$${item.amount.toFixed(2)}</span>
-                        ${isDeposit ? `<span class="history-status ${item.status}">${item.status}</span>` : '<span class="history-status approved">Success</span>'}
-                    </div>
-                `;
-                list.appendChild(card);
+                try {
+                    const isDeposit = item.type === 'deposit';
+                    const method = isDeposit ? (item.method || 'Deposit') : 'Account Purchase';
+                    const amountPrefix = isDeposit ? '+' : '-';
+                    const amountClass = isDeposit ? 'pos' : 'neg';
+                    const amount = typeof item.amount === 'number' ? item.amount : parseFloat(item.amount || 0);
+                    
+                    const date = new Date(item.created_at).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                    });
+                    
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.innerHTML = `
+                        <div class="history-info">
+                            <span class="history-method">${method}</span>
+                            <span class="history-date">${date}</span>
+                        </div>
+                        <div class="history-right">
+                            <span class="history-amount ${amountClass}">${amountPrefix}$${amount.toFixed(2)}</span>
+                            ${isDeposit ? `<span class="history-status ${item.status}">${item.status}</span>` : '<span class="history-status approved">Success</span>'}
+                        </div>
+                    `;
+                    list.appendChild(card);
+                } catch (err) {
+                    console.error("Error rendering history item:", item, err);
+                }
             });
         }
 
