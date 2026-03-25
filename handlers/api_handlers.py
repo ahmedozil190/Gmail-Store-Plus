@@ -2,7 +2,27 @@ from aiohttp import web
 import json
 from database import get_user, get_available_accounts_count, get_user_orders, get_next_available_account, get_admin_stats, get_all_users, get_all_accounts, get_all_deposits, approve_deposit, reject_deposit
 from datetime import datetime
+import aiohttp
+import asyncio
 from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID
+
+_rate_cache = {"rate": 52.7, "last_updated": 0}
+
+async def get_live_rate():
+    now = datetime.now().timestamp()
+    if now - _rate_cache["last_updated"] < 3600: # Cache for 1 hour
+        return _rate_cache["rate"]
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.exchangerate-api.com/v4/latest/USD") as resp:
+                data = await resp.json()
+                rate = data['rates'].get('EGP', 52.7)
+                _rate_cache["rate"] = rate
+                _rate_cache["last_updated"] = now
+                return rate
+    except:
+        return _rate_cache["rate"]
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
@@ -16,14 +36,15 @@ async def get_user_data(request):
     orders = get_user_orders(int(user_id))
     total_spent = sum(o['price'] for o in orders)
     
-    from config import VODAFONE_NUMBER, EXCHANGE_RATE_EGP
+    from config import VODAFONE_NUMBER
+    exchange_rate = await get_live_rate()
     return web.json_response({
         'balance': user['balance'],
         'language': user['language'],
         'total_spent': total_spent,
         'total_accounts': len(orders),
         'vodafone_number': VODAFONE_NUMBER,
-        'exchange_rate': EXCHANGE_RATE_EGP
+        'exchange_rate': exchange_rate
     })
 
 async def get_shop_data(request):

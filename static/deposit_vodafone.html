@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vodafone Cash Deposit - Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.5">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.5">
+    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -20,7 +20,7 @@
         }
 
         .vodafone-number {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 900;
             color: #ef4444;
             letter-spacing: 1px;
@@ -28,7 +28,7 @@
             display: block;
         }
 
-        .rate-info { font-size: 0.75rem; color: #ef4444; font-weight: 700; margin-top: 5px; }
+        .rate-info { font-size: 0.85rem; color: #fff; font-weight: 700; margin-top: 5px; opacity: 0.8; }
 
         .input-group { display: flex; flex-direction: column; gap: 8px; }
         .input-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-left: 5px; }
@@ -43,7 +43,6 @@
             outline: none;
         }
 
-        /* Hide Number Spinners */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -58,9 +57,9 @@
             align-items: center;
             color: #fff;
             font-weight: 700;
-            display: none; /* Initially Hidden */
+            display: none;
         }
-        .calc-result span { color: #10b981; font-size: 1.1rem; font-weight: 900; }
+        .calc-result span.val { color: #10b981; font-size: 1.15rem; font-weight: 900; }
 
         .file-upload-btn {
             background: rgba(59, 130, 246, 0.1);
@@ -93,7 +92,7 @@
                 <button class="back-btn" onclick="history.back()">
                     <i class="fas fa-arrow-left"></i>
                 </button>
-                <span>Deposit Vodafone</span>
+                <span>Add Balance</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
@@ -103,30 +102,30 @@
                 <div class="instruction-card">
                     <span style="font-size: 0.85rem; color: var(--text-secondary);">Transfer amount to:</span>
                     <span class="vodafone-number" id="vNumber">010XXXXXXXX</span>
-                    <div class="rate-info" id="rateLine">* Rate: 1$ = 0.00 EGP</div>
+                    <div class="rate-info" id="rateLine">1$ = 0.00 EGP</div>
                 </div>
 
                 <div class="input-group">
-                    <label>Amount (USD)</label>
-                    <input type="number" id="amount" class="input-field" placeholder="Placeholder - Amount (USD)" step="1">
+                    <label>Deposit Amount ($)</label>
+                    <input type="number" id="amount" class="input-field" placeholder="Enter amount (e.g. 10)" step="1">
                 </div>
 
                 <div class="calc-result" id="calcBox">
-                    <span>You must pay:</span>
-                    <span id="egpTotal">0.00 EGP</span>
+                    <span>Pay in EGP:</span>
+                    <span class="val" id="egpTotal">0.00 EGP</span>
                 </div>
 
                 <div class="input-group">
-                    <label>Proof of Transfer</label>
+                    <label>Transfer Proof</label>
                     <label for="imageInput" class="file-upload-btn">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span id="uploadStatus">Upload receipt</span>
+                        <i class="fas fa-camera"></i>
+                        <span id="uploadStatus">Tap to upload proof</span>
                     </label>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
                     <img id="imagePreview" src="">
                 </div>
 
-                <button class="submit-btn" id="submitBtn">Submit Request</button>
+                <button class="submit-btn" id="submitBtn">Send Request</button>
             </div>
         </main>
     </div>
@@ -145,9 +144,12 @@
                 if (data.vodafone_number) {
                     document.getElementById('vNumber').innerText = data.vodafone_number;
                     exchangeRate = data.exchange_rate;
-                    document.getElementById('rateLine').innerText = `* Rate: 1$ = ${exchangeRate.toFixed(2)} EGP`;
+                    document.getElementById('rateLine').innerText = `1$ = ${exchangeRate.toFixed(2)} EGP`;
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('rateLine').innerText = "Rating system busy...";
+            }
         }
 
         const amountInput = document.getElementById('amount');
@@ -176,7 +178,7 @@
                 reader.onload = (re) => {
                     imgPreview.src = re.target.result;
                     imgPreview.style.display = 'block';
-                    uploadStatus.innerText = 'Photo Selected';
+                    uploadStatus.innerText = 'Screenshot ready';
                 };
                 reader.readAsDataURL(file);
             }
@@ -187,16 +189,16 @@
             const file = imgInput.files[0];
 
             if (!amount || amount < 1) {
-                tg.showAlert('Min deposit is $1.00');
+                tg.showAlert('Minimum is $1.00');
                 return;
             }
             if (!file) {
-                tg.showAlert('Upload photo first');
+                tg.showAlert('Proof image required');
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerText = 'Sending...';
+            submitBtn.innerText = 'Verifying...';
 
             const formData = new FormData();
             formData.append('user_id', user.id);
@@ -207,12 +209,12 @@
                 const res = await fetch('/api/manual_deposit', { method: 'POST', body: formData });
                 const result = await res.json();
                 if (result.success) {
-                    tg.showPopup({ title: 'Success', message: 'Sent to admin!', buttons: [{type: 'ok'}] }, () => {
+                    tg.showPopup({ title: 'Sent!', message: 'Admin will review and update your balance.', buttons: [{type: 'ok'}] }, () => {
                         window.location.href = '/static/wallet.html';
                     });
                 } else { tg.showAlert('Error: ' + result.error); }
-            } catch (e) { tg.showAlert('Failed'); }
-            finally { submitBtn.disabled = false; submitBtn.innerText = 'Submit Request'; }
+            } catch (e) { tg.showAlert('Network error'); }
+            finally { submitBtn.disabled = false; submitBtn.innerText = 'Send Request'; }
         };
 
         initPage();
