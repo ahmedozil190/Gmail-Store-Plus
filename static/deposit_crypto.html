@@ -92,6 +92,20 @@
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .back-btn:active { color: #fff; transform: scale(0.9); }
+
         .pay-btn {
             background: linear-gradient(90deg, #3b82f6, #2563eb);
             color: #fff;
@@ -146,7 +160,7 @@
                     </div>
                 </div>
 
-                <input type="number" id="customAmount" class="custom-amount-input" placeholder="Or type custom amount ($)">
+                <input type="number" id="customAmount" class="custom-amount-input" placeholder="Custom amount">
 
                 <button class="pay-btn" id="payBtn" onclick="generateInvoice()">Generate Crypto Invoice</button>
             </div>
