@@ -46,6 +46,7 @@ def init_db():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS accounts_pool (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            public_id       INTEGER UNIQUE,
             email           TEXT    UNIQUE,
             password        TEXT,
             recovery_email  TEXT,
@@ -56,6 +57,17 @@ def init_db():
             sold_to_user_id INTEGER
         )
     """)
+
+    # Migration for public_id
+    columns_acc = [c['name'] for c in cur.execute("PRAGMA table_info(accounts_pool)").fetchall()]
+    if 'public_id' not in columns_acc:
+        cur.execute("ALTER TABLE accounts_pool ADD COLUMN public_id INTEGER")
+    
+    # Fill empty public_ids with random 8-digit numbers
+    empty_accs = cur.execute("SELECT id FROM accounts_pool WHERE public_id IS NULL").fetchall()
+    for acc in empty_accs:
+        new_pid = secrets.randbelow(90000000) + 10000000 # 10,000,000 to 99,999,999
+        cur.execute("UPDATE accounts_pool SET public_id = ? WHERE id = ?", (new_pid, acc['id']))
 
     # Deposits (Top-ups)
     cur.execute("""
@@ -135,10 +147,16 @@ def adjust_user_balance(user_id: int, delta: float):
 def add_account_to_pool(email, password, recovery_email="", price=0.50):
     con = _conn()
     try:
+        # Generate unique 8-digit public_id
+        while True:
+            public_id = secrets.randbelow(90000000) + 10000000
+            if not con.execute("SELECT 1 FROM accounts_pool WHERE public_id = ?", (public_id,)).fetchone():
+                break
+                
         con.execute(
-            """INSERT INTO accounts_pool (email, password, recovery_email, price, added_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (email, password, recovery_email, price, datetime.now().isoformat())
+            """INSERT INTO accounts_pool (public_id, email, password, recovery_email, price, added_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (public_id, email, password, recovery_email, price, datetime.now().isoformat())
         )
         con.commit()
         return True

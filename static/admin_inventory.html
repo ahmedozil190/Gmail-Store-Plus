@@ -3,112 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inventory Management - Admin Console</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.8">
+    <title>Inventory Pool - Admin Console</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --glass-bg: rgba(26, 34, 48, 0.85);
+            --card-blue: rgba(22, 36, 61, 0.75);
+            --card-red: rgba(45, 26, 30, 0.75);
+            --tab-bg: rgba(26, 34, 48, 0.9);
+            --tab-active: #3b82f6;
+            --purple-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             --glass-border: 1px solid rgba(255, 255, 255, 0.08);
             --glass-blur: blur(12px);
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-purple: #8b5cf6;
         }
 
-        .inventory-stats {
+        .stats-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .inv-card {
-            background: var(--glass-bg);
+        .stat-card-mini {
+            background: rgba(255, 255, 255, 0.03);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .stat-card-mini.total { border-color: rgba(59, 130, 246, 0.3); background: var(--card-blue); }
+        .stat-card-mini.sold { border-color: rgba(239, 68, 68, 0.3); background: var(--card-red); }
+
+        .stat-card-mini .label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .stat-card-mini .value { font-size: 1.5rem; font-weight: 900; color: #fff; }
+
+        .action-card {
+            background: var(--tab-bg);
             border: var(--glass-border);
             border-radius: 24px;
             padding: 20px;
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            text-align: center;
-        }
-
-        .inv-card .label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
-        .inv-card .value { font-size: 1.8rem; font-weight: 900; color: #fff; }
-
-        .filter-container {
-            background: var(--glass-bg);
-            border: var(--glass-border);
-            border-radius: 20px;
-            padding: 6px;
-            display: flex;
             margin-bottom: 25px;
             backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
         }
 
-        .filter-tab {
+        .tabs-container {
+            background: #111827;
+            border-radius: 14px;
+            display: flex;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab-item {
             flex: 1;
-            padding: 12px;
-            border-radius: 16px;
+            padding: 10px;
+            border-radius: 10px;
             text-align: center;
             font-size: 0.85rem;
             font-weight: 700;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
         }
 
-        .filter-tab.active { background: var(--accent-blue); color: #fff; }
+        .tab-item.active { background: var(--tab-active); color: #fff; }
 
-        .account-list { display: flex; flex-direction: column; gap: 12px; }
+        .search-box-fancy { position: relative; margin-bottom: 15px; }
+        .search-input-fancy {
+            width: 100%;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 14px;
+            padding: 14px 15px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .btn-find {
+            width: 100%;
+            background: var(--purple-grad);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .management-section { margin-top: 0; }
+        .management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .management-title { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .results-badge {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .account-list-new { display: flex; flex-direction: column; gap: 15px; }
         
         .account-card-premium {
             background: rgba(17, 24, 39, 0.7);
             border: var(--glass-border);
-            border-radius: 20px;
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: transform 0.2s;
+            border-radius: 24px;
+            padding: 20px;
         }
 
-        .acc-icon {
-            width: 45px;
-            height: 45px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 14px;
+        .acc-card-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-blue);
-            font-size: 1.2rem;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
-        .acc-info { flex: 1; }
-        .acc-email { display: block; font-weight: 700; color: #fff; font-size: 0.9rem; word-break: break-all; }
-        .acc-meta { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
-        
-        .status-badge {
-            width: 28px;
-            height: 28px;
+        .acc-card-header .email { font-size: 0.95rem; font-weight: 800; color: #fff; word-break: break-all; flex: 1; margin-right: 10px; }
+        .acc-card-header .status-check {
+            width: 24px;
+            height: 24px;
+            background: #10b981;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            color: #fff;
+            font-size: 0.7rem;
+            flex-shrink: 0;
         }
 
-        .status-available { background: #10b981; color: #fff; }
-        .status-sold { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+        .acc-card-header.sold .status-check { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
 
-        .acc-actions { display: flex; gap: 8px; }
-        .action-tool { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; transition: 0.2s; }
-        .action-tool:hover { background: rgba(255,255,255,0.1); }
-        .action-tool.delete:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .acc-card-sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        /* Custom Modal */
+        .acc-card-sub .public-id { color: #3b82f6; font-size: 0.85rem; font-weight: 800; }
+        .acc-card-sub .delete-btn { color: #ef4444; font-size: 0.9rem; cursor: pointer; padding: 5px; opacity: 0.7; }
+        .acc-card-sub .delete-btn:hover { opacity: 1; }
+
+        /* Deletion Modal (Same as previous) */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -121,9 +180,8 @@
             padding: 20px;
         }
         .modal-overlay.open { display: flex; }
-        
         .custom-modal {
-            background: var(--glass-bg);
+            background: var(--tab-bg);
             border: var(--glass-border);
             border-radius: 28px;
             padding: 30px;
@@ -132,23 +190,16 @@
             text-align: center;
             backdrop-filter: var(--glass-blur);
         }
-
         .modal-icon {
-            width: 60px;
-            height: 60px;
+            width: 60px; height: 60px;
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin: 0 auto 20px;
         }
-
         .modal-title { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 10px; }
         .modal-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5; }
-        
         .modal-actions { display: flex; flex-direction: column; gap: 10px; }
         .modal-btn { padding: 14px; border-radius: 14px; font-weight: 700; border: none; cursor: pointer; font-size: 0.95rem; }
         .modal-btn-confirm { background: #ef4444; color: #fff; }
@@ -186,45 +237,65 @@
         <header class="page-title">
             <div class="page-title-inner">
                 <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-                <span>Inventory Pool</span>
+                <span>Account Pool</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
 
         <main class="main-content">
-            <div class="inventory-stats">
-                <div class="inv-card">
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card-mini total">
                     <span class="label">Available</span>
                     <span class="value" id="countAvailable">0</span>
                 </div>
-                <div class="inv-card">
+                <div class="stat-card-mini sold">
                     <span class="label">Sold</span>
                     <span class="value" id="countSold">0</span>
                 </div>
             </div>
 
-            <div class="filter-container">
-                <div class="filter-tab active" onclick="setFilter('all', this)">All</div>
-                <div class="filter-tab" onclick="setFilter('available', this)">Available</div>
-                <div class="filter-tab" onclick="setFilter('sold', this)">Sold</div>
+            <!-- Filters & Search -->
+            <div class="action-card">
+                <div class="tabs-container">
+                    <div class="tab-item active" onclick="setTab('all', this)">All</div>
+                    <div class="tab-item" onclick="setTab('available', this)">Available</div>
+                    <div class="tab-item" onclick="setTab('sold', this)">Sold</div>
+                </div>
+
+                <div class="search-box-fancy">
+                    <input type="text" class="search-input-fancy" id="accSearch" placeholder="Search by Email or ID...">
+                </div>
+
+                <button class="btn-find" onclick="applySearch()">
+                    <i class="fas fa-search"></i> Find
+                </button>
             </div>
 
-            <div class="account-list" id="accountList">
-                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                    <i class="fas fa-spinner fa-spin"></i> Loading inventory...
+            <!-- Management Section Card -->
+            <div class="management-section action-card">
+                <div class="management-header">
+                    <h2 class="management-title">Inventory Control</h2>
+                    <span class="results-badge" id="resultsCount">0 results</span>
+                </div>
+
+                <div class="account-list-new" id="accountList">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Custom Deletion Modal -->
+    <!-- Delete Modal -->
     <div class="modal-overlay" id="deleteModal">
         <div class="custom-modal">
             <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
             <h3 class="modal-title">Delete Account?</h3>
-            <p class="modal-desc">Are you sure you want to remove this account from the pool? This action cannot be undone.</p>
+            <p class="modal-desc">Are you sure you want to remove this account? This will permanently delete item #<span id="delIdDisplay"></span>.</p>
             <div class="modal-actions">
-                <button class="modal-btn modal-btn-confirm" id="confirmDeleteBtn">Delete Now</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Delete Now</button>
                 <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
             </div>
         </div>
@@ -261,7 +332,7 @@
                 }
                 allAccounts = Array.isArray(data) ? data : [];
                 updateStats();
-                applyFilter();
+                applySearch();
             } catch (e) { console.error(e); }
         }
 
@@ -270,25 +341,38 @@
             document.getElementById('countSold').innerText = allAccounts.filter(a => a.status === 'sold').length;
         }
 
-        function setFilter(filter, el) {
+        function setTab(filter, el) {
             currentFilter = filter;
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
-            applyFilter();
+            applySearch();
         }
 
-        function applyFilter() {
+        function applySearch() {
+            const query = document.getElementById('accSearch').value.toLowerCase();
             let filtered = allAccounts;
+
             if (currentFilter !== 'all') {
-                filtered = allAccounts.filter(a => a.status === currentFilter);
+                filtered = filtered.filter(a => a.status === currentFilter);
             }
+
+            if (query) {
+                filtered = filtered.filter(a => 
+                    (a.email && a.email.toLowerCase().includes(query)) ||
+                    (a.public_id && a.public_id.toString().includes(query)) ||
+                    (`#${a.public_id}`).includes(query)
+                );
+            }
+
             renderAccounts(filtered);
         }
 
         function renderAccounts(accounts) {
             const list = document.getElementById('accountList');
+            document.getElementById('resultsCount').innerText = `${accounts.length} results`;
+
             if (accounts.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No matching accounts found</div>';
+                list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No accounts found</div>`;
                 return;
             }
 
@@ -296,44 +380,42 @@
                 const isSold = a.status === 'sold';
                 return `
                 <div class="account-card-premium">
-                    <div class="acc-icon">
-                        <i class="fas ${isSold ? 'fa-shopping-bag' : 'fa-envelope'}"></i>
-                    </div>
-                    <div class="acc-info">
-                        <span class="acc-email">${a.email || 'Mystery Account'}</span>
-                        <span class="acc-meta">ID: #${a.id}</span>
-                    </div>
-                    <div class="status-badge ${isSold ? 'status-sold' : 'status-available'}">
-                        <i class="fas ${isSold ? 'fa-shopping-cart' : 'fa-check'}"></i>
-                    </div>
-                    <div class="acc-actions">
-                        <div class="action-tool delete" onclick="openDeleteModal(${a.id})">
-                            <i class="fas fa-trash-alt"></i>
+                    <div class="acc-card-header ${isSold ? 'sold' : ''}">
+                        <span class="email">${a.email || 'Mystery Account'}</span>
+                        <div class="status-check">
+                            <i class="fas ${isSold ? 'fa-shopping-cart' : 'fa-check'}"></i>
                         </div>
+                    </div>
+                    
+                    <div class="acc-card-sub">
+                        <span class="public-id">ID: #${a.public_id}</span>
+                        <span class="delete-btn" onclick="openDeleteModal(${a.public_id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </span>
                     </div>
                 </div>
                 `;
             }).join('');
         }
 
-        let accountToDelete = null;
+        let idToDelete = null;
 
-        function openDeleteModal(id) {
-            accountToDelete = id;
+        function openDeleteModal(pid) {
+            idToDelete = pid;
+            document.getElementById('delIdDisplay').innerText = pid;
             document.getElementById('deleteModal').classList.add('open');
         }
 
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.remove('open');
-            accountToDelete = null;
+            idToDelete = null;
         }
 
-        document.getElementById('confirmDeleteBtn').onclick = async () => {
-            if (!accountToDelete) return;
-            // API logic would go here
-            alert(`Simulated: Account #${accountToDelete} deleted.`);
+        async function confirmDelete() {
+            if (!idToDelete) return;
+            // API Logic for deletion by public_id or internal id would go here
+            alert(`Simulated: Account #${idToDelete} deleted successfully!`);
             closeDeleteModal();
-            // Optionally reload: loadAccounts();
         }
 
         loadAccounts();
