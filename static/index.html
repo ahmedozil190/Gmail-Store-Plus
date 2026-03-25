@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Gmail Store Plus</title>
-    <!-- Combined CSS from Farmer Bot -->
-    <link rel="stylesheet" href="/static/style.css?v=3.0">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.0">
+    <link rel="stylesheet" href="/static/style.css?v=3.2">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header / Page Title -->
+        <!-- Header -->
         <header class="page-title">
             <div class="page-title-inner">
                 <button class="hamburger-btn" id="menuBtn">
@@ -24,21 +23,22 @@
         </header>
 
         <main class="main-content">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="glass-card stat-card green">
-                    <span class="stat-title">Current Balance</span>
-                    <span class="stat-value" id="balance">0.00 $</span>
+            <!-- Consolidate Stats Card (3 Rows) -->
+            <div class="glass-card stat-card-multi">
+                <div class="stat-row">
+                    <span class="stat-label">Current Balance</span>
+                    <span class="stat-value green" id="balance">0.00 $</span>
                 </div>
-                <div class="glass-card stat-card blue">
-                    <span class="stat-title">Total Spent</span>
-                    <span class="stat-value" id="total-spent">0.00 $</span>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Withdrawn</span>
+                    <span class="stat-value blue" id="total-spent">0.00 $</span>
                 </div>
-            </div>
-
-            <div class="glass-card stat-card amber" style="margin-top: -10px;">
-                <span class="stat-title">Pending</span>
-                <span class="stat-value" id="pending">0.00 $</span>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Accounts Purchased</span>
+                    <span class="stat-value orange" id="total-accounts">0</span>
+                </div>
             </div>
 
             <!-- Shop Section -->
@@ -47,7 +47,6 @@
             </div>
 
             <div id="products-list" class="elite-grid">
-                <!-- Product Card Styled like Elite Cards -->
                 <div class="elite-card" onclick="buyOne()">
                     <i class="fas fa-envelope"></i>
                     <div class="info">
@@ -58,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- Footer Actions -->
+            <!-- Other Actions -->
             <div class="elite-grid" style="margin-top: 20px;">
                 <div class="elite-card">
                     <i class="fas fa-history"></i>
@@ -78,7 +77,7 @@
         </main>
     </div>
 
-    <!-- Sidebar / Drawer Structure from Farmer Bot -->
+    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="overlay"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -129,7 +128,7 @@
                 if (data.balance !== undefined) {
                     document.getElementById('balance').innerText = `${data.balance.toFixed(2)} $`;
                     document.getElementById('total-spent').innerText = `${(data.total_spent || 0).toFixed(2)} $`;
-                    document.getElementById('pending').innerText = "0.00 $";
+                    document.getElementById('total-accounts').innerText = `${data.total_accounts || 0}`;
                 }
             } catch (e) { console.error(e); }
         }

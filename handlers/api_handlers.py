@@ -17,7 +17,8 @@ async def get_user_data(request):
     return web.json_response({
         'balance': user['balance'],
         'language': user['language'],
-        'total_spent': total_spent
+        'total_spent': total_spent,
+        'total_accounts': len(orders)
     })
 
 async def get_orders(request):

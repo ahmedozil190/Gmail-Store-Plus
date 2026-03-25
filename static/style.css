@@ -9,6 +9,9 @@
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
+    --orange: #f59e0b; /* Match pending color */
+    --blue: #60a5fa;
+    --green: #10b981;
     --nav-bg: rgba(15, 17, 26, 0.95);
 }
 
@@ -293,7 +296,43 @@ body::before {
     color: var(--text-secondary);
 }
 
-/* Stats */
+/* Multi-Row Stats Card */
+.stat-card-multi {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px !important;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.stat-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.stat-value.green { color: var(--green); }
+.stat-value.blue { color: var(--blue); }
+.stat-value.orange { color: var(--orange); }
+
+.stat-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 4px 0;
+}
+
+/* Stats (LEGACY - keep for grid if needed, but not used in index) */
 .stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
