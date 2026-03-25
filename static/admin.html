@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css?v=1.2">
+    <link rel="stylesheet" href="/static/style.css?v=1.4">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         .admin-grid {
@@ -28,81 +28,51 @@
         .admin-card .val {
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--primary);
+            color: #10b981;
         }
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        .btn-action {
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-approve { background: var(--success); color: #fff; }
-        .btn-reject { background: var(--accent); color: #fff; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="section-title">📊 لوحة الإدارة</div>
-        <div class="status-badge" style="background: rgba(56, 189, 248, 0.1); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;">Admin Access</div>
+    <div class="header-v2">
+        <div class="header-title">Admin Panel</div>
+        <div class="status-badge" style="background: rgba(56, 189, 248, 0.1); color: var(--secondary); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;">Admin Access</div>
     </div>
 
     <div class="admin-grid">
         <div class="admin-card">
-            <h4>إجمالي المستخدمين</h4>
+            <h4>Total Users</h4>
             <div class="val" id="users-count">0</div>
         </div>
         <div class="admin-card">
-            <h4>الحسابات المتوفرة</h4>
+            <h4>In Stock</h4>
             <div class="val" id="acc-count">0</div>
         </div>
         <div class="admin-card">
-            <h4>إجمالي المبيعات</h4>
+            <h4>Total Sales</h4>
             <div class="val" id="total-sales">$0</div>
         </div>
         <div class="admin-card">
-            <h4>طلبات معلقة</h4>
+            <h4>Pending Req.</h4>
             <div class="val" id="pending-count">0</div>
         </div>
     </div>
 
     <div class="section-header">
-        <div class="section-title">⚡ إدارة سريعة</div>
+        <div class="section-title">Quick Management</div>
     </div>
     
-    <div class="accounts-grid" id="deposit-requests">
+    <div id="deposit-requests">
         <div style="text-align: center; color: var(--text-muted); padding: 30px; background: var(--card-bg); border-radius: 20px;">
-            لا توجد طلبات إيداع معلقة حالياً
+            No pending deposit requests.
         </div>
-    </div>
-
-    <div class="nav-dock">
-        <a href="index.html" class="nav-link">
-            <div class="icon-bg">👤</div>
-            <span>المستخدم</span>
-        </a>
-        <a href="#" class="nav-link active">
-            <div class="icon-bg">📈</div>
-            <span>الإحصائيات</span>
-        </a>
-        <a href="#" class="nav-link">
-            <div class="icon-bg">⚙️</div>
-            <span>الإعدادات</span>
-        </a>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#060a16';
+        tg.headerColor = '#0f172a';
 
         async function loadAdminStats() {
-            // Placeholder for admin data fetch
             document.getElementById('users-count').innerText = "142";
             document.getElementById('acc-count').innerText = "85";
             document.getElementById('total-sales').innerText = "$542.5";
