@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Inventory - Admin Console</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .filter-tab {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .filter-tab.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+        .account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .account-card {
+            background: #232e3c;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .acc-status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .acc-status-icon.available { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .acc-status-icon.sold { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .acc-info { flex: 1; min-width: 0; }
+        .acc-email { display: block; font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
+        .acc-id { font-size: 0.75rem; color: var(--text-secondary); }
+        .acc-actions { display: flex; gap: 8px; }
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+        }
+        .action-btn.delete:hover { background: #ef4444; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
+                <button class="close-sidebar" id="closeBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/admin_panel" class="sidebar-item">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </a>
+                <a href="/admin_users" class="sidebar-item">
+                    <i class="fas fa-users-cog"></i> <span>Manage Users</span>
+                </a>
+                <a href="/admin_inventory" class="sidebar-item active">
+                    <i class="fas fa-box-open"></i> <span>Inventory</span>
+                </a>
+                <a href="/admin_deposits" class="sidebar-item">
+                    <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
+                </a>
+                <div class="stat-divider" style="margin: 10px 0; opacity: 0.1;"></div>
+                <a href="/" class="sidebar-item" style="opacity: 0.7;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-overlay" id="overlay"></div>
+
+        <!-- Header -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="hamburger-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span>Inventory Pool</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-filter="all">All Items</div>
+                <div class="filter-tab" data-filter="available">Available</div>
+                <div class="filter-tab" data-filter="sold">Sold Out</div>
+            </div>
+
+            <div class="account-list" id="accountList">
+                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Loading inventory...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = '#232e3c';
+        tg.backgroundColor = '#232e3c';
+
+        const adminUser = tg.initDataUnsafe.user;
+        if (adminUser) {
+            document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+        let allAccounts = [];
+
+        async function loadAccounts() {
+            try {
+                const res = await fetch(`/api/admin_accounts?user_id=${adminUser?.id}`);
+                allAccounts = await res.json();
+                renderAccounts(allAccounts);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderAccounts(accounts) {
+            const list = document.getElementById('accountList');
+            if (accounts.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No accounts found</div>';
+                return;
+            }
+
+            list.innerHTML = accounts.map(a => `
+                <div class="account-card">
+                    <div class="acc-status-icon ${a.is_sold ? 'sold' : 'available'}">
+                        <i class="fas ${a.is_sold ? 'fa-shopping-cart' : 'fa-check-circle'}"></i>
+                    </div>
+                    <div class="acc-info">
+                        <span class="acc-email">${a.account_data.split('\n')[0].split(':')[0]}</span>
+                        <span class="acc-id">#${a.id} • ${a.is_sold ? 'Sold' : 'Available'} • $${a.price}</span>
+                    </div>
+                    <div class="acc-actions">
+                        <div class="action-btn" title="View Details"><i class="fas fa-eye"></i></div>
+                        <div class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelector('.filter-tab.active').classList.remove('active');
+                tab.classList.add('active');
+                const filter = tab.dataset.filter;
+                if (filter === 'all') renderAccounts(allAccounts);
+                else {
+                    const filtered = allAccounts.filter(a => 
+                        (filter === 'sold' && a.is_sold) || (filter === 'available' && !a.is_sold)
+                    );
+                    renderAccounts(filtered);
+                }
+            }
+        });
+
+        loadAccounts();
+    </script>
+</body>
+</html>

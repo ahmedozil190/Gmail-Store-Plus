@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deposits - Admin Console</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .deposit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .deposit-card {
+            background: #232e3c;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .dep-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .dep-amount { font-size: 1.4rem; font-weight: 800; color: #10b981; font-family: 'Outfit', sans-serif; }
+        .dep-status {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .status-approved { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .status-rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        .dep-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        .dep-info p { margin-bottom: 5px; }
+        .dep-proof {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 12px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+        .dep-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-approve { background: #10b981; color: #fff; }
+        .btn-reject { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .action-btn:active { transform: scale(0.96); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
+                <button class="close-sidebar" id="closeBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/admin_panel" class="sidebar-item">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </a>
+                <a href="/admin_users" class="sidebar-item">
+                    <i class="fas fa-users-cog"></i> <span>Manage Users</span>
+                </a>
+                <a href="/admin_inventory" class="sidebar-item">
+                    <i class="fas fa-box-open"></i> <span>Inventory</span>
+                </a>
+                <a href="/admin_deposits" class="sidebar-item active">
+                    <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
+                </a>
+                <div class="stat-divider" style="margin: 10px 0; opacity: 0.1;"></div>
+                <a href="/" class="sidebar-item" style="opacity: 0.7;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-overlay" id="overlay"></div>
+
+        <!-- Header -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="hamburger-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span>Deposit Requests</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="deposit-list" id="depositList">
+                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Loading deposits...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = '#232e3c';
+        tg.backgroundColor = '#232e3c';
+
+        const adminUser = tg.initDataUnsafe.user;
+        if (adminUser) {
+            document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
+        async function loadDeposits() {
+            try {
+                const res = await fetch(`/api/admin_deposits?user_id=${adminUser?.id}`);
+                const deposits = await res.json();
+                renderDeposits(deposits);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderDeposits(deposits) {
+            const list = document.getElementById('depositList');
+            if (deposits.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No deposit requests</div>';
+                return;
+            }
+
+            list.innerHTML = deposits.map(d => `
+                <div class="deposit-card">
+                    <div class="dep-header">
+                        <span class="dep-amount">$${d.amount.toFixed(2)}</span>
+                        <span class="dep-status status-${d.status}">${d.status}</span>
+                    </div>
+                    <div class="dep-info">
+                        <p><strong>User:</strong> ${d.user_id}</p>
+                        <p><strong>Method:</strong> ${d.method || 'Manual'}</p>
+                        <p><strong>Date:</strong> ${new Date(d.created_at).toLocaleString()}</p>
+                    </div>
+                    ${d.proof_data ? `<div class="dep-proof">Proof: ${d.proof_data}</div>` : ''}
+                    
+                    ${d.status === 'pending' ? `
+                        <div class="dep-actions" id="actions-${d.id}">
+                            <button class="action-btn btn-reject" onclick="handleDeposit(${d.id}, 'reject')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            <button class="action-btn btn-approve" onclick="handleDeposit(${d.id}, 'approve')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function handleDeposit(depId, action) {
+            const btnContainer = document.getElementById(`actions-${depId}`);
+            btnContainer.style.opacity = '0.5';
+            btnContainer.querySelectorAll('button').forEach(b => b.disabled = true);
+
+            try {
+                const endpoint = action === 'approve' ? '/api/approve_deposit' : '/api/reject_deposit';
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_id: adminUser?.id,
+                        dep_id: depId,
+                        reason: action === 'reject' ? 'Rejected via Admin Panel' : ''
+                    })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    loadDeposits(); // Refresh list
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                    btnContainer.style.opacity = '1';
+                    btnContainer.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Connection error');
+                btnContainer.style.opacity = '1';
+                btnContainer.querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+        }
+
+        loadDeposits();
+    </script>
+</body>
+</html>

@@ -102,9 +102,15 @@ def main():
     
     async def serve_index(request): return web.FileResponse(os.path.join(static_path, 'index.html'))
     async def serve_admin(request): return web.FileResponse(os.path.join(static_path, 'admin.html'))
+    async def serve_admin_users(request): return web.FileResponse(os.path.join(static_path, 'admin_users.html'))
+    async def serve_admin_inv(request): return web.FileResponse(os.path.join(static_path, 'admin_inventory.html'))
+    async def serve_admin_dep(request): return web.FileResponse(os.path.join(static_path, 'admin_deposits.html'))
     
     webhook_app.router.add_get('/', serve_index)
     webhook_app.router.add_get('/admin_panel', serve_admin)
+    webhook_app.router.add_get('/admin_users', serve_admin_users)
+    webhook_app.router.add_get('/admin_inventory', serve_admin_inv)
+    webhook_app.router.add_get('/admin_deposits', serve_admin_dep)
 
     # Start in the same event loop
     loop = asyncio.get_event_loop()

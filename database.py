@@ -310,5 +310,26 @@ def get_admin_stats():
             "pending_deposits": pending_deposits,
             "total_balance": round(total_balance, 2)
         }
+def get_all_users():
+    con = _conn()
+    con.row_factory = sqlite3.Row
+    try:
+        return [dict(r) for r in con.execute("SELECT * FROM users ORDER BY joined_at DESC").fetchall()]
+    finally:
+        con.close()
+
+def get_all_accounts():
+    con = _conn()
+    con.row_factory = sqlite3.Row
+    try:
+        return [dict(r) for r in con.execute("SELECT * FROM accounts_pool ORDER BY id DESC").fetchall()]
+    finally:
+        con.close()
+
+def get_all_deposits():
+    con = _conn()
+    con.row_factory = sqlite3.Row
+    try:
+        return [dict(r) for r in con.execute("SELECT * FROM deposits ORDER BY status='pending' DESC, created_at DESC").fetchall()]
     finally:
         con.close()
