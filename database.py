@@ -391,16 +391,27 @@ def get_user_wallet_history(user_id: int):
     con.row_factory = sqlite3.Row
     try:
         # Get Deposits
-        deposits = [dict(r) for r in con.execute("SELECT * FROM deposits WHERE user_id = ?", (user_id,)).fetchall()]
-        for d in deposits: d['type'] = 'deposit'
+        deposits_raw = con.execute("SELECT * FROM deposits WHERE user_id = ?", (user_id,)).fetchall()
+        deposits = []
+        for r in deposits_raw:
+            d = dict(r)
+            d['type'] = 'deposit'
+            # d already has 'amount' and 'created_at'
+            deposits.append(d)
         
         # Get Orders
-        orders = [dict(r) for r in con.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,)).fetchall()]
-        for o in orders: o['type'] = 'purchase'
+        orders_raw = con.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,)).fetchall()
+        orders = []
+        for r in orders_raw:
+            o = dict(r)
+            o['type'] = 'purchase'
+            o['amount'] = o['price_paid']
+            o['created_at'] = o['purchased_at']
+            orders.append(o)
         
         # Combine and Sort
         history = deposits + orders
-        history.sort(key=lambda x: x['created_at'], reverse=True)
+        history.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         return history
     finally:
         con.close()
