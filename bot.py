@@ -93,7 +93,7 @@ def main():
     # ── Start Web Server (Webhooks + MiniApp) ──────────────────────────
     webhook_app = web.Application()
     setup_webhook(webhook_app, app)
-    setup_api(webhook_app)
+    setup_api(webhook_app, app)
 
     # Static files
     static_path = os.path.join(os.path.dirname(__file__), 'static')

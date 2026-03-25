@@ -257,7 +257,20 @@ async def post_approve_deposit(request):
         if not user_id or str(user_id) != str(ADMIN_ID):
             return web.json_response({'error': 'Unauthorized'}, status=403)
         
-        if approve_deposit(int(dep_id)):
+        dep = approve_deposit(int(dep_id))
+        if dep:
+            # Notify user
+            bot = request.app['bot_app'].bot
+            from strings import STRINGS
+            from database import get_user
+            u = get_user(dep['user_id'])
+            lang = u['language'] if u else 'ar'
+            msg = STRINGS[lang]['DEPOSIT_APPROVED_NOTIFY'].format(amount=dep['amount'])
+            try:
+                await bot.send_message(chat_id=dep['user_id'], text=msg, parse_mode='HTML')
+            except Exception as e:
+                print(f"Error sending approval notification: {e}")
+
             return web.json_response({'success': True})
         return web.json_response({'error': 'Failed to approve'}, status=400)
     except Exception as e:
@@ -272,12 +285,27 @@ async def post_reject_deposit(request):
         if not user_id or str(user_id) != str(ADMIN_ID):
             return web.json_response({'error': 'Unauthorized'}, status=403)
         
-        reject_deposit(int(dep_id), reason)
+        dep = reject_deposit(int(dep_id), reason)
+        if dep:
+            # Notify user
+            bot = request.app['bot_app'].bot
+            from strings import STRINGS
+            from database import get_user
+            u = get_user(dep['user_id'])
+            lang = u['language'] if u else 'ar'
+            msg = STRINGS[lang]['DEPOSIT_REJECTED_NOTIFY'].format(amount=dep['amount'], reason=reason)
+            try:
+                await bot.send_message(chat_id=dep['user_id'], text=msg, parse_mode='HTML')
+            except Exception as e:
+                print(f"Error sending rejection notification: {e}")
+
+            return web.json_response({'success': True})
         return web.json_response({'success': True})
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
 
-def setup_api(app):
+def setup_api(app, bot_app):
+    app['bot_app'] = bot_app
     app.router.add_get('/api/user_data', get_user_data)
     app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)

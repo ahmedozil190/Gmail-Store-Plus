@@ -244,19 +244,22 @@ def approve_deposit(dep_id: int):
     dep = cur.execute("SELECT * FROM deposits WHERE id = ?", (dep_id,)).fetchone()
     if not dep or dep['status'] != 'pending':
         con.close()
-        return False
+        return None
 
     cur.execute("UPDATE deposits SET status = 'approved' WHERE id = ?", (dep_id,))
     cur.execute("UPDATE users SET balance = ROUND(balance + ?, 2) WHERE user_id = ?", (dep['amount'], dep['user_id']))
     con.commit()
     con.close()
-    return True
+    return dict(dep)
 
 def reject_deposit(dep_id: int, reason: str):
     con = _conn()
-    con.execute("UPDATE deposits SET status = 'rejected', reject_reason = ? WHERE id = ?", (reason, dep_id))
+    cur = con.cursor()
+    cur.execute("UPDATE deposits SET status = 'rejected', reject_reason = ? WHERE id = ?", (reason, dep_id))
+    dep = cur.execute("SELECT * FROM deposits WHERE id = ?", (dep_id,)).fetchone()
     con.commit()
     con.close()
+    return dict(dep) if dep else None
 
 def get_deposit_by_external_id(ext_id: str):
     con = _conn()

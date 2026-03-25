@@ -24,6 +24,8 @@ STRINGS = {
         'DEPOSIT_SENDER_PHONE_PROMPT': "📱 أدخل رقم الهاتف الذي قمت بالتحويل منه (فودافون كاش):",
         'DEPOSIT_INSTRUCTIONS': "📝 <b>تعليمات الشحن:</b>\n\n{instructions}\n\nبعد التحويل، أرسل إثبات التحويل (رقم المعاملة أو صورة):",
         'DEPOSIT_SUCCESS': "✅ تم إرسال طلب الشحن بنجاح!\n\nسيتم مراجعة الطلب من قبل الإدارة وإضافة الرصيد فور التأكد.",
+        'DEPOSIT_APPROVED_NOTIFY': "✅ <b>تم قبول طلب الإيداع الخاص بك!</b>\n\nالمبلغ: <b>{amount}$</b>\nتم إضافة الرصيد إلى حسابك بنجاح. شكراً لتعاملك معنا!",
+        'DEPOSIT_REJECTED_NOTIFY': "❌ <b>تم رفض طلب الإيداع الخاص بك</b>\n\nالمبلغ: <b>{amount}$</b>\nالسبب: {reason}\nيرجى مراجعة الدعم الفني إذا كنت تعتقد أن هناك خطأ.",
         
         # Shop
         'SHOP_TITLE': "🛒 <b>متجر الحسابات</b>\n\n",
@@ -97,6 +99,8 @@ STRINGS = {
         'DEPOSIT_SENDER_PHONE_PROMPT': "📱 Enter the phone number you sent from (Vodafone Cash):",
         'DEPOSIT_INSTRUCTIONS': "📝 <b>Instructions:</b>\n\n{instructions}\n\nAfter transferring, send proof (Transaction ID or screenshot):",
         'DEPOSIT_SUCCESS': "✅ Top-up request submitted successfully!\n\nThe admin will review it and add the balance once confirmed.",
+        'DEPOSIT_APPROVED_NOTIFY': "✅ <b>Your deposit request has been approved!</b>\n\nAmount: <b>{amount}$</b>\nBalance has been added to your account. Thank you for choosing us!",
+        'DEPOSIT_REJECTED_NOTIFY': "❌ <b>Your deposit request has been rejected</b>\n\nAmount: <b>{amount}$</b>\nReason: {reason}\nPlease contact support if you think this is a mistake.",
         
         # Shop
         'SHOP_TITLE': "🛒 <b>Accounts Store</b>\n\n",
