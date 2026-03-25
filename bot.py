@@ -78,11 +78,12 @@ def main():
     
     # Set Menu Button
     async def set_menu_btn():
+        from config import WEBAPP_URL
         await app.bot.set_chat_menu_button(
             menu_button={
                 "type": "web_app",
                 "text": "Open App",
-                "web_app": {"url": "https://gmail-store-plus-production.up.railway.app/"}
+                "web_app": {"url": f"{WEBAPP_URL}/"}
             }
         )
     

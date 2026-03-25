@@ -14,7 +14,7 @@ else:
 # ── Business Settings ────────────────────────────────────────────────────────
 BOT_NAME = os.getenv("BOT_NAME", "Gmail Store Bot")
 SUPPORT_LINK = os.getenv("SUPPORT_LINK", "@A_M_E_15")
-WEBAPP_URL = os.getenv("WEBAPP_URL", "https://your-domain.railway.app")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://gmail-store-plus-production.up.railway.app").rstrip("/")
 BASE_CURRENCY = "USD"
 
 # ── Sale Settings ────────────────────────────────────────────────────────────
