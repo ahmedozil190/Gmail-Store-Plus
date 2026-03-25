@@ -11,6 +11,7 @@ from handlers.shop import shop_handler, purchase_callback_handler, my_orders_han
 from handlers.admin import admin_help_handler, add_accounts_handler, approve_dep_handler, reject_dep_handler
 from handlers.webhook_handler import setup_webhook
 from handlers.api_handlers import setup_api
+from handlers.help import help_handler
 from strings import STRINGS
 from aiohttp import web
 import os
@@ -54,6 +55,8 @@ def main():
     # Settings / Back
     app.add_handler(MessageHandler(filters.Regex(f"^({s_ar['BTN_SETTINGS']}|{s_en['BTN_SETTINGS']})$"), settings_handler))
     app.add_handler(MessageHandler(filters.Regex(f"^({s_ar['BTN_BACK']}|{s_en['BTN_BACK']})$"), back_handler))
+    # Help
+    app.add_handler(MessageHandler(filters.Regex(f"^({s_ar['BTN_HELP']}|{s_en['BTN_HELP']})$"), help_handler))
 
     # Callbacks
     app.add_handler(CallbackQueryHandler(language_callback_handler, pattern="^lang_"))
@@ -115,7 +118,7 @@ def main():
     from config import CRYPTOMUS_CALLBACK_URL
     if CRYPTOMUS_CALLBACK_URL:
         logger.info(f"✅ Webhook active. Callback URL: {CRYPTOMUS_CALLBACK_URL}")
-
+    
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":

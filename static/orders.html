@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>My Orders - Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.3">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.3">
+    <link rel="stylesheet" href="/static/style.css?v=3.4">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -14,9 +14,9 @@
         <!-- Header -->
         <header class="page-title">
             <div class="page-title-inner">
-                <a href="/static/index.html" class="page-title-back">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
+                <button class="hamburger-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <span>My Orders</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
@@ -28,13 +28,29 @@
             </div>
 
             <div id="orders-list" class="elite-list">
-                <!-- Orders will be loaded here -->
                 <div class="loading-text" style="text-align: center; padding: 20px; color: var(--text-secondary);">
                     Loading your orders...
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-title">Gmail Store Plus</span>
+            <button class="sidebar-close" id="closeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/static/index.html" class="sidebar-item"><i class="fas fa-home"></i> Home</a>
+            <a href="/static/orders.html" class="sidebar-item active"><i class="fas fa-shopping-cart"></i> My Orders</a>
+            <a href="/static/wallet.html" class="sidebar-item"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="/static/support.html" class="sidebar-item"><i class="fas fa-headset"></i> Support</a>
+        </nav>
+    </aside>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -46,6 +62,15 @@
         if (user) {
             document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
         }
+
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadOrders() {
             try {
@@ -90,7 +115,6 @@
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
                 tg.HapticFeedback.notificationOccurred('success');
-                // Optional: show a mini toast/alert
             });
         }
 
@@ -98,7 +122,6 @@
     </script>
 
     <style>
-        /* Small override for label width on this page */
         :root { --elite-label-width: 80px; }
         .elite-card-detailed { margin-bottom: 12px; }
     </style>
