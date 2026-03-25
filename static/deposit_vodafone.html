@@ -130,6 +130,11 @@
                 </div>
 
                 <div class="input-group">
+                    <label>Sender Phone Number</label>
+                    <input type="tel" id="senderPhone" class="input-field" placeholder="e.g. 010XXXXXXXX" maxlength="11">
+                </div>
+
+                <div class="input-group">
                     <label>Transfer Proof</label>
                     <label for="imageInput" class="file-upload-btn">
                         <i class="fas fa-camera"></i>
@@ -202,9 +207,14 @@
         submitBtn.onclick = async () => {
             const amount = amountInput.value;
             const file = imgInput.files[0];
+            const senderPhone = document.getElementById('senderPhone').value.trim();
 
             if (!amount || amount < 1) {
                 tg.showAlert('Minimum is $1.00');
+                return;
+            }
+            if (!senderPhone || senderPhone.length < 10) {
+                tg.showAlert('Please enter the phone number you sent from');
                 return;
             }
             if (!file) {
@@ -218,6 +228,7 @@
             const formData = new FormData();
             formData.append('user_id', user.id);
             formData.append('amount', amount);
+            formData.append('sender_phone', senderPhone);
             formData.append('proof', file);
 
             try {

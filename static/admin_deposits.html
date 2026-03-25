@@ -84,6 +84,37 @@
         .btn-approve { background: var(--accent-green); color: #fff; }
         .btn-reject { background: rgba(255,255,255,0.05); color: #fff; }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ── Image Modal ── */
+        .img-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .img-modal-overlay.open { display: flex; }
+        .img-modal-overlay img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 16px;
+            object-fit: contain;
+        }
+        .img-modal-close {
+            margin-top: 18px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +162,12 @@
         </main>
     </div>
 
+    <!-- Image Modal -->
+    <div class="img-modal-overlay" id="imgModal">
+        <img id="modalImg" src="" alt="Receipt">
+        <button class="img-modal-close" onclick="closeModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -173,13 +210,14 @@
                     <div class="dep-info">
                         <p><strong>User ID:</strong> ${d.user_id}</p>
                         <p><strong>Method:</strong> ${d.method || 'Manual'}</p>
+                        ${d.sender_phone ? `<p><strong>Sender Phone:</strong> ${d.sender_phone}</p>` : ''}
                         <p><strong>Date:</strong> ${new Date(d.created_at).toLocaleString()}</p>
                     </div>
 
                     ${d.proof_link ? `
-                        <a href="${d.proof_link}" target="_blank" class="btn-view-proof">
+                        <button class="btn-view-proof" onclick="openModal('${d.proof_link}')">
                             <i class="fas fa-image"></i> View Receipt
-                        </a>
+                        </button>
                     ` : ''}
                     
                     ${d.status === 'pending' ? `
@@ -230,6 +268,19 @@
                 btnContainer.querySelectorAll('button').forEach(b => b.disabled = false);
             }
         }
+
+        function openModal(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imgModal').classList.add('open');
+        }
+        function closeModal() {
+            document.getElementById('imgModal').classList.remove('open');
+            document.getElementById('modalImg').src = '';
+        }
+        // Close modal on overlay click
+        document.getElementById('imgModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
 
         loadDeposits();
     </script>

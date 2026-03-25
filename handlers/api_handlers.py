@@ -181,8 +181,13 @@ async def post_manual_deposit(request):
             
             if part.name == 'proof':
                 filename = f"proof_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{part.filename}"
+                # Use absolute path so it always works regardless of working directory
+                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                uploads_dir = os.path.join(base_dir, 'static', 'uploads', 'proofs')
+                os.makedirs(uploads_dir, exist_ok=True)
+                abs_file_path = os.path.join(uploads_dir, filename)
                 file_path = f"static/uploads/proofs/{filename}"
-                with open(file_path, 'wb') as f:
+                with open(abs_file_path, 'wb') as f:
                     while True:
                         chunk = await part.read_chunk()
                         if not chunk:
@@ -193,13 +198,14 @@ async def post_manual_deposit(request):
 
         user_id = data.get('user_id')
         amount = data.get('amount')
+        sender_phone = data.get('sender_phone', '')
         
         if not user_id or not amount or not file_path:
             return web.json_response({'error': 'Missing required fields'}, status=400)
 
         from database import create_deposit_request
         # Method is 'Vodafone Cash'
-        create_deposit_request(int(user_id), float(amount), 'Vodafone Cash', f"/{file_path}")
+        create_deposit_request(int(user_id), float(amount), 'Vodafone Cash', f"/{file_path}", sender_phone=sender_phone)
         
         return web.json_response({'success': True})
     except Exception as e:

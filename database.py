@@ -80,13 +80,20 @@ def init_db():
             status          TEXT    DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
             created_at      TEXT,
             reject_reason   TEXT,
-            external_id     TEXT    -- For Cryptomus UUID
+            external_id     TEXT,   -- For Cryptomus UUID
+            sender_phone    TEXT    -- Phone number used for Vodafone Cash transfer
         )
     """)
 
     # Migration: Add external_id column if it doesn't exist
     try:
         cur.execute("ALTER TABLE deposits ADD COLUMN external_id TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    # Migration: Add sender_phone column if it doesn't exist
+    try:
+        cur.execute("ALTER TABLE deposits ADD COLUMN sender_phone TEXT")
     except sqlite3.OperationalError:
         pass
 
@@ -218,13 +225,13 @@ def purchase_account(user_id: int, account_id: int):
         con.close()
 
 # ── Deposit Helpers ───────────────────────────────────────────────────────────
-def create_deposit_request(user_id: int, amount: float, method: str, proof: str):
+def create_deposit_request(user_id: int, amount: float, method: str, proof: str, sender_phone: str = ''):
     con = _conn()
     cur = con.cursor()
     cur.execute(
-        """INSERT INTO deposits (user_id, amount, method, proof_link, created_at)
-           VALUES (?, ?, ?, ?, ?)""",
-        (user_id, amount, method, proof, datetime.now().isoformat())
+        """INSERT INTO deposits (user_id, amount, method, proof_link, created_at, sender_phone)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (user_id, amount, method, proof, datetime.now().isoformat(), sender_phone)
     )
     con.commit()
     dep_id = cur.lastrowid
