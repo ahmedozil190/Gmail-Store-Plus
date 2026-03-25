@@ -64,7 +64,7 @@ async def admin_dashboard_handler(update: Update, context: ContextTypes.DEFAULT_
     text += f"\n\n🌐 Current URL: <code>{WEBAPP_URL}</code>"
     
     keyboard = [
-        [InlineKeyboardButton(s['BTN_ADMIN_PANEL'], web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin_panel"))]
+        [InlineKeyboardButton(s['BTN_ADMIN_PANEL'], web_app=WebAppInfo(url=f"{WEBAPP_URL}/static/admin.html"))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
