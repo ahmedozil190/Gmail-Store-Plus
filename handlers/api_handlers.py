@@ -1,13 +1,23 @@
 from aiohttp import web
 import json
 import os
+import cloudinary
+import cloudinary.uploader
 from database import get_user, get_available_accounts_count, get_user_orders, get_next_available_account, get_admin_stats, get_all_users, get_all_accounts, get_all_deposits, approve_deposit, reject_deposit
 from datetime import datetime
 import aiohttp
 import asyncio
 import hashlib
 import base64
-from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL
+from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+
+# Cloudinary Config
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True
+)
 
 _rate_cache = {"rate": 52.7, "last_updated": 0}
 
@@ -171,29 +181,17 @@ async def post_create_crypto_invoice(request):
 async def post_manual_deposit(request):
     try:
         reader = await request.multipart()
-        
         data = {}
-        file_path = None
+        file_content = None
+        filename = None
         
         while True:
             part = await reader.next()
-            if part is None:
-                break
+            if part is None: break
             
             if part.name == 'proof':
-                filename = f"proof_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{part.filename}"
-                # Use absolute path so it always works regardless of working directory
-                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                uploads_dir = os.path.join(base_dir, 'static', 'uploads', 'proofs')
-                os.makedirs(uploads_dir, exist_ok=True)
-                abs_file_path = os.path.join(uploads_dir, filename)
-                file_path = f"static/uploads/proofs/{filename}"
-                with open(abs_file_path, 'wb') as f:
-                    while True:
-                        chunk = await part.read_chunk()
-                        if not chunk:
-                            break
-                        f.write(chunk)
+                filename = part.filename
+                file_content = await part.read()
             else:
                 data[part.name] = (await part.read()).decode('utf-8')
 
@@ -201,12 +199,40 @@ async def post_manual_deposit(request):
         amount = data.get('amount')
         sender_phone = data.get('sender_phone', '')
         
-        if not user_id or not amount or not file_path:
-            return web.json_response({'error': 'Missing required fields'}, status=400)
+        if not user_id or not amount or not file_content:
+            return web.json_response({'error': 'Missing required fields or file'}, status=400)
+
+        proof_url = None
+
+        # Upload to Cloudinary if configured
+        if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY:
+            try:
+                upload_result = await asyncio.to_thread(
+                    cloudinary.uploader.upload,
+                    file_content,
+                    folder="proofs",
+                    public_id=f"proof_{user_id}_{int(datetime.now().timestamp())}"
+                )
+                proof_url = upload_result.get("secure_url")
+            except Exception as e:
+                print(f"Cloudinary Upload Error: {e}")
+
+        # Fallback to local if Cloudinary not configured or failed
+        if not proof_url:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            uploads_dir = os.path.join(base_dir, 'static', 'uploads', 'proofs')
+            os.makedirs(uploads_dir, exist_ok=True)
+            
+            ext = filename.split('.')[-1] if filename and '.' in filename else 'jpg'
+            local_filename = f"proof_{user_id}_{int(datetime.now().timestamp())}.{ext}"
+            abs_file_path = os.path.join(uploads_dir, local_filename)
+            
+            with open(abs_file_path, 'wb') as f:
+                f.write(file_content)
+            proof_url = f"/static/uploads/proofs/{local_filename}"
 
         from database import create_deposit_request
-        # Method is 'Vodafone Cash'
-        create_deposit_request(int(user_id), float(amount), 'Vodafone Cash', f"/{file_path}", sender_phone=sender_phone)
+        create_deposit_request(int(user_id), float(amount), 'Vodafone Cash', proof_url, sender_phone=sender_phone)
         
         return web.json_response({'success': True})
     except Exception as e:

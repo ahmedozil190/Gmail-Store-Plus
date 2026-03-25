@@ -44,3 +44,8 @@ DEPOSIT_INSTRUCTIONS = {
     "💎 TRX (TRC20)": "أرسل المبلغ إلى العنوان: <code>T...</code>\nثم أرسل هاش المعاملة.",
     "🤖 Cryptomus (Crypto)": "سيتم توليد رابط دفع تلقائي لك. بمجرد الدفع سيتم تحديث الرصيد تلقائياً.",
 }
+
+# ── Cloudinary Settings ──────────────────────────────────────────────────────
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
