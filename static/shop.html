@@ -176,7 +176,7 @@
             modalText.innerText = text;
             modalConfirm.innerText = confirmText || 'OK';
             
-            modalCancel.innerText = 'إلغاء';
+            modalCancel.innerText = 'Cancel';
             if (type === 'error') {
                 modalIcon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i>';
                 modalCancel.style.display = 'none';
@@ -258,16 +258,16 @@
             const total = (qty * unitPrice).toFixed(2);
             
             if (qty > currentStock) {
-                showModal('خطأ في المخزن', `عذراً، يتوفر حالياً ${currentStock} حساباً فقط.`, 'error', 'إغلاق');
+                showModal('Stock Error', `Sorry, only ${currentStock} accounts available.`, 'error', 'Close');
                 return;
             }
 
             if (total > userBalance) {
-                showModal('الرصيد غير كافٍ', `رصيدك الحالي هو $${userBalance.toFixed(2)}، بينما العملية تتطلب $${total}.`, 'error', 'إغلاق');
+                showModal('Balance Error', `Insufficient balance. You need $${total} but you have $${userBalance.toFixed(2)}.`, 'error', 'Close');
                 return;
             }
 
-            showModal('تأكيد الشراء', `هل أنت متأكد من شراء ${qty} حساباً مقابل $${total}؟`, 'confirm', 'شراء الآن', () => {
+            showModal('Confirm Purchase', `Buy ${qty} accounts for $${total}?`, 'confirm', 'Buy Now', () => {
                 tg.sendData(JSON.stringify({action: 'buy', qty: qty}));
                 tg.close();
             });
