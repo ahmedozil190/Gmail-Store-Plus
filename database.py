@@ -366,3 +366,11 @@ def get_all_deposits():
         return [dict(r) for r in con.execute("SELECT * FROM deposits ORDER BY status='pending' DESC, created_at DESC").fetchall()]
     finally:
         con.close()
+
+def get_user_deposits(user_id: int):
+    con = _conn()
+    con.row_factory = sqlite3.Row
+    try:
+        return [dict(r) for r in con.execute("SELECT * FROM deposits WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()]
+    finally:
+        con.close()

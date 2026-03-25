@@ -265,6 +265,7 @@ def setup_api(app):
     app.router.add_get('/api/user_data', get_user_data)
     app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)
+    app.router.add_get('/api/user_deposits', get_user_deposits_api)
     app.router.add_post('/api/manual_deposit', post_manual_deposit)
     app.router.add_post('/api/create_crypto_invoice', post_create_crypto_invoice)
     app.router.add_post('/api/cryptomus_webhook', cryptomus_webhook)

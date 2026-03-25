@@ -3,38 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Wallet - Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.4">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.4">
+    <title>My Wallet - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.8">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .history-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+        .history-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-info { display: flex; flex-direction: column; gap: 4px; }
+        .history-method { font-size: 0.9rem; font-weight: 700; color: #fff; }
+        .history-date { font-size: 0.7rem; color: var(--text-secondary); }
+        .history-right { text-align: right; }
+        .history-amount { font-size: 1rem; font-weight: 800; color: #fff; display: block; }
+        .history-status { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+        .history-status.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .history-status.approved { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .history-status.rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
-        <header class="page-title">
-            <div class="page-title-inner">
-                <button class="hamburger-btn" id="menuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <span>Wallet</span>
-                <div class="page-title-avatar" id="avatar">A</div>
+        <header class="wa-header">
+            <div class="wa-avatar" id="avatar">A</div>
+            <div class="wa-info">
+                <div class="wa-username" id="userName">User</div>
+                <div class="wa-greeting">Manage your balance</div>
             </div>
         </header>
 
-        <main class="main-content">
-            <!-- Balance Card -->
+        <main class="main-content" style="padding-top: 20px;">
             <div class="glass-card balance-card">
-                <div class="balance-label">Available Balance</div>
-                <div class="balance-amount"><span id="balance">0.00</span> <span class="currency">$</span></div>
+                <div class="balance-label">Total Balance</div>
+                <div class="balance-amount">$<span id="balance">0.00</span></div>
             </div>
 
-            <div class="elite-section-header">
-                <h3 class="elite-section-title">Top Up Balance</h3>
+            <div class="elite-section-header" style="margin-top: 20px;">
+                <span class="elite-section-title">Deposit Methods</span>
             </div>
 
             <div class="elite-grid">
-                <!-- Cryptomus Option -->
                 <div class="elite-card" id="cryptoBtn">
                     <i class="fas fa-bitcoin-sign" style="color: #f59e0b;"></i>
                     <div class="info">
@@ -43,7 +59,6 @@
                     <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);"></i>
                 </div>
 
-                <!-- Vodafone Option -->
                 <div class="elite-card" id="vodafoneBtn">
                     <i class="fas fa-mobile-screen-button" style="color: #ef4444;"></i>
                     <div class="info">
@@ -53,56 +68,95 @@
                 </div>
             </div>
 
+            <div class="elite-section-header" style="margin-top: 30px;">
+                <span class="elite-section-title">Transaction History</span>
+                <i class="fas fa-clock-rotate-left" style="color: var(--text-secondary); opacity: 0.5;"></i>
+            </div>
+
+            <div class="history-list" id="historyList">
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    No transactions yet.
+                </div>
             </div>
         </main>
-    </div>
 
-    <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="overlay"></div>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-title">Gmail Store Plus</span>
-            <button class="sidebar-close" id="closeBtn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/static/index.html" class="sidebar-item"><i class="fas fa-home"></i> Home</a>
-            <a href="/static/shop.html" class="sidebar-item"><i class="fas fa-shopping-bag"></i> Shop</a>
-            <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> My Orders</a>
-            <a href="/static/wallet.html" class="sidebar-item active"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="/static/help.html" class="sidebar-item"><i class="fas fa-headset"></i> Help</a>
+        <nav class="bottom-nav">
+            <a href="/static/index.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/static/shop.html" class="nav-item">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Shop</span>
+            </a>
+            <a href="/static/wallet.html" class="nav-item active">
+                <i class="fas fa-wallet"></i>
+                <span>Wallet</span>
+            </a>
+            <a href="/static/orders.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>Orders</span>
+            </a>
+            <a href="/static/help.html" class="nav-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Help</span>
+            </a>
         </nav>
-    </aside>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#232e3c';
-        tg.backgroundColor = '#232e3c';
-
         const user = tg.initDataUnsafe.user;
+
         if (user) {
-            document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+            document.getElementById('userName').innerText = user.first_name;
+            document.getElementById('avatar').innerText = user.first_name[0].toUpperCase();
         }
 
-        // Sidebar Logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const menuBtn = document.getElementById('menuBtn');
-        const closeBtn = document.getElementById('closeBtn');
-
-        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
-        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
-
-        async function loadBalance() {
+        async function loadData() {
             try {
-                const response = await fetch(`/api/user_data?user_id=${user?.id}`);
-                const data = await response.json();
-                if (data.balance !== undefined) {
-                    document.getElementById('balance').innerText = data.balance.toFixed(2);
-                }
-            } catch (e) { console.error(e); }
+                const userId = user?.id || 7142953055;
+                const [userRes, historyRes] = await Promise.all([
+                    fetch(`/api/user_data?user_id=${userId}`),
+                    fetch(`/api/user_deposits?user_id=${userId}`)
+                ]);
+                
+                const userData = await userRes.json();
+                document.getElementById('balance').innerText = userData.balance.toFixed(2);
+
+                const history = await historyRes.json();
+                renderHistory(history);
+            } catch (e) {
+                console.error("Error loading wallet data:", e);
+            }
+        }
+
+        function renderHistory(items) {
+            const list = document.getElementById('historyList');
+            if (items.length === 0) return;
+
+            list.innerHTML = '';
+            items.forEach(item => {
+                const date = new Date(item.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+                
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                card.innerHTML = `
+                    <div class="history-info">
+                        <span class="history-method">${item.method}</span>
+                        <span class="history-date">${date}</span>
+                    </div>
+                    <div class="history-right">
+                        <span class="history-amount">+$${item.amount.toFixed(2)}</span>
+                        <span class="history-status ${item.status}">${item.status}</span>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
         }
 
         document.getElementById('cryptoBtn').onclick = () => {
@@ -113,7 +167,7 @@
             window.location.href = '/static/deposit_vodafone.html';
         };
 
-        loadBalance();
+        loadData();
     </script>
 </body>
 </html>
