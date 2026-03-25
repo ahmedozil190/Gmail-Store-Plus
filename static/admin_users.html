@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,20 +9,91 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .search-container { margin: 20px 0; position: relative; }
-        .search-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px 15px 15px 45px; color: #fff; font-size: 0.95rem; outline: none; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
-        .user-list { display: flex; flex-direction: column; gap: 12px; }
-        .user-card { background: #232e3c; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; display: flex; align-items: center; gap: 15px; }
-        .user-avatar { width: 45px; height: 45px; background: var(--accent-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; }
-        .user-info { flex: 1; }
-        .user-name { display: block; font-weight: 700; margin-bottom: 2px; }
-        .user-id-text { font-size: 0.75rem; color: var(--text-secondary); }
-        .user-meta { text-align: right; }
-        .user-balance { display: block; font-weight: 800; color: #10b981; font-family: 'Outfit', sans-serif; }
-        .user-date { font-size: 0.7rem; color: var(--text-secondary); }
+        .search-container {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 15px 15px 15px 45px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .user-card {
+            background: #232e3c;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--accent-blue);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .user-id-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .user-meta {
+            text-align: right;
+        }
+
+        .user-balance {
+            display: block;
+            font-weight: 800;
+            color: #10b981;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .user-date {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar -->
@@ -71,12 +143,6 @@
                     <p id="loadingMsg">Loading users...</p>
                 </div>
             </div>
-
-            <!-- Debug Area -->
-            <div id="debugArea" style="margin-top: 20px; font-size: 10px; color: #888; background: #000; padding: 10px; border-radius: 10px; display: none;">
-                <h4>Raw Debug:</h4>
-                <pre id="rawJSON"></pre>
-            </div>
         </main>
     </div>
 
@@ -106,22 +172,13 @@
                 const res = await fetch(`/api/admin_users?user_id=${adminUser.id}`);
                 const data = await res.json();
                 console.log("Admin Users Data Received:", data);
-                
+
                 if (data.error) {
                     document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Error: ${data.error}</div>`;
                     return;
                 }
 
                 allUsers = Array.isArray(data) ? data : [];
-                
-                // Debugging
-                const debugArea = document.getElementById('debugArea');
-                const rawJSON = document.getElementById('rawJSON');
-                if (allUsers.length > 0) {
-                    debugArea.style.display = 'block';
-                    rawJSON.innerText = JSON.stringify(allUsers[0], null, 2);
-                }
-
                 renderUsers(allUsers);
             } catch (e) {
                 console.error(e);
@@ -137,7 +194,7 @@
             }
 
             list.innerHTML = users.map(u => {
-                const displayName = u.full_name || u.username || 'Anonymous';
+                const displayName = (u.full_name && u.full_name.trim().length > 0) ? u.full_name : (u.username || 'User ' + u.user_id);
                 const avatarChar = displayName[0].toUpperCase();
                 return `
                 <div class="user-card">
@@ -157,8 +214,8 @@
 
         document.getElementById('userSearch').oninput = (e) => {
             const query = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(u => 
-                (u.full_name && u.full_name.toLowerCase().includes(query)) || 
+            const filtered = allUsers.filter(u =>
+                (u.full_name && u.full_name.toLowerCase().includes(query)) ||
                 (u.username && u.username.toLowerCase().includes(query)) ||
                 u.user_id.toString().includes(query)
             );
@@ -168,4 +225,5 @@
         loadUsers();
     </script>
 </body>
+
 </html>
