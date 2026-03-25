@@ -85,8 +85,7 @@
                 <a href="/admin_deposits" class="sidebar-item">
                     <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
                 </a>
-                <div class="stat-divider" style="margin: 10px 0; opacity: 0.1;"></div>
-                <a href="/" class="sidebar-item" style="opacity: 0.7;">
+                <a href="/" class="sidebar-item" style="opacity: 0.7; margin-top: 10px;">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
                 </a>
             </div>
@@ -144,9 +143,19 @@
         async function loadUsers() {
             try {
                 const res = await fetch(`/api/admin_users?user_id=${adminUser?.id}`);
-                allUsers = await res.json();
+                const data = await res.json();
+                
+                if (data.error) {
+                    document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                allUsers = Array.isArray(data) ? data : [];
                 renderUsers(allUsers);
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Connection Failed</div>`;
+            }
         }
 
         function renderUsers(users) {

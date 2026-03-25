@@ -97,8 +97,7 @@
                 <a href="/admin_deposits" class="sidebar-item">
                     <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
                 </a>
-                <div class="stat-divider" style="margin: 10px 0; opacity: 0.1;"></div>
-                <a href="/" class="sidebar-item" style="opacity: 0.7;">
+                <a href="/" class="sidebar-item" style="opacity: 0.7; margin-top: 10px;">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
                 </a>
             </div>
@@ -156,9 +155,19 @@
         async function loadAccounts() {
             try {
                 const res = await fetch(`/api/admin_accounts?user_id=${adminUser?.id}`);
-                allAccounts = await res.json();
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById('accountList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                allAccounts = Array.isArray(data) ? data : [];
                 renderAccounts(allAccounts);
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('accountList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Connection Failed</div>`;
+            }
         }
 
         function renderAccounts(accounts) {
@@ -168,13 +177,15 @@
                 return;
             }
 
-            list.innerHTML = accounts.map(a => `
+            list.innerHTML = accounts.map(a => {
+                const displayEmail = (a.account_data || "").split('\n')[0].split(':')[0] || "Unknown Account";
+                return `
                 <div class="account-card">
                     <div class="acc-status-icon ${a.is_sold ? 'sold' : 'available'}">
                         <i class="fas ${a.is_sold ? 'fa-shopping-cart' : 'fa-check-circle'}"></i>
                     </div>
                     <div class="acc-info">
-                        <span class="acc-email">${a.account_data.split('\n')[0].split(':')[0]}</span>
+                        <span class="acc-email">${displayEmail}</span>
                         <span class="acc-id">#${a.id} • ${a.is_sold ? 'Sold' : 'Available'} • $${a.price}</span>
                     </div>
                     <div class="acc-actions">
@@ -182,7 +193,8 @@
                         <div class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         document.querySelectorAll('.filter-tab').forEach(tab => {
