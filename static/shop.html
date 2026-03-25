@@ -255,21 +255,22 @@
 
         document.getElementById('buyBtn').onclick = () => {
             const qty = parseInt(qtyInput.value);
-            const total = (qty * unitPrice).toFixed(2);
+            const totalVal = parseFloat((qty * unitPrice).toFixed(2));
+            const totalStr = totalVal.toFixed(2);
             
             if (qty > currentStock) {
                 showModal('Stock Error', `Sorry, only ${currentStock} accounts available.`, 'error', 'Close');
                 return;
             }
 
-            if (total > userBalance) {
-                showModal('Balance Error', `Insufficient balance. You need $${total} but you have $${userBalance.toFixed(2)}.`, 'error', 'Close');
+            if (totalVal > userBalance) {
+                showModal('Balance Error', `Insufficient balance. You need $${totalStr} but you have $${userBalance.toFixed(2)}.`, 'error', 'Close');
                 return;
             }
 
-            showModal('Confirm Purchase', `Buy ${qty} accounts for $${total}?`, 'confirm', 'Buy Now', () => {
+            showModal('Confirm Purchase', `Buy ${qty} accounts for $${totalStr}?`, 'confirm', 'Buy Now', () => {
                 tg.sendData(JSON.stringify({action: 'buy', qty: qty}));
-                tg.close();
+                // tg.close(); // tg.sendData already closes the app
             });
         };
 
