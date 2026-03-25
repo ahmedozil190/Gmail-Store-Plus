@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.2">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.2">
+    <link rel="stylesheet" href="/static/style.css?v=3.3">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -23,7 +23,7 @@
         </header>
 
         <main class="main-content">
-            <!-- Consolidate Stats Card (3 Rows) -->
+            <!-- Consolidate Stats Card -->
             <div class="glass-card stat-card-multi">
                 <div class="stat-row">
                     <span class="stat-label">Current Balance</span>
@@ -31,7 +31,7 @@
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-row">
-                    <span class="stat-label">Total Withdrawn</span>
+                    <span class="stat-label">Total Spent</span>
                     <span class="stat-value blue" id="total-spent">0.00 $</span>
                 </div>
                 <div class="stat-divider"></div>
@@ -59,25 +59,31 @@
 
             <!-- Other Actions -->
             <div class="elite-grid" style="margin-top: 20px;">
-                <div class="elite-card">
+                <a href="/static/orders.html" class="elite-card">
                     <i class="fas fa-history"></i>
                     <div class="info">
                         <span class="title">My Orders</span>
                         <span class="desc">View your purchase history</span>
                     </div>
-                </div>
-                <div class="elite-card">
+                </a>
+                <a href="/static/wallet.html" class="elite-card">
+                    <i class="fas fa-wallet"></i>
+                    <div class="info">
+                        <span class="title">Wallet</span>
+                        <span class="desc">Top up your balance</span>
+                    </div>
+                </a>
+                <a href="/static/support.html" class="elite-card">
                     <i class="fas fa-headset"></i>
                     <div class="info">
                         <span class="title">Contact Support</span>
                         <span class="desc">24/7 Customer assistance</span>
                     </div>
-                </div>
+                </a>
             </div>
         </main>
     </div>
 
-    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="overlay"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -87,17 +93,17 @@
             </button>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" class="sidebar-item active"><i class="fas fa-home"></i> Home</a>
-            <a href="#" class="sidebar-item"><i class="fas fa-shopping-cart"></i> Store</a>
-            <a href="#" class="sidebar-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="#" class="sidebar-item"><i class="fas fa-info-circle"></i> About</a>
+            <a href="/static/index.html" class="sidebar-item active"><i class="fas fa-home"></i> Home</a>
+            <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> My Orders</a>
+            <a href="/static/wallet.html" class="sidebar-item"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="/static/support.html" class="sidebar-item"><i class="fas fa-headset"></i> Support</a>
         </nav>
     </aside>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0a0b10';
+        tg.headerColor = '#15161f';
         tg.backgroundColor = '#0a0b10';
 
         const user = tg.initDataUnsafe.user;
@@ -105,21 +111,13 @@
             document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
         }
 
-        // Sidebar Logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
         const menuBtn = document.getElementById('menuBtn');
         const closeBtn = document.getElementById('closeBtn');
 
-        menuBtn.onclick = () => {
-            sidebar.classList.add('open');
-            overlay.classList.add('open');
-        }
-
-        closeBtn.onclick = overlay.onclick = () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('open');
-        }
+        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadData() {
             try {
@@ -141,7 +139,6 @@
                 }
             });
         }
-
         loadData();
     </script>
 </body>

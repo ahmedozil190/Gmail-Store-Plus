@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>My Orders - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.3">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.3">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <a href="/static/index.html" class="page-title-back">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span>My Orders</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="elite-section-header">
+                <h3 class="elite-section-title">Purchase History</h3>
+            </div>
+
+            <div id="orders-list" class="elite-list">
+                <!-- Orders will be loaded here -->
+                <div class="loading-text" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                    Loading your orders...
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = '#15161f';
+        tg.backgroundColor = '#0a0b10';
+
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`/api/orders?user_id=${user?.id}`);
+                const orders = await response.json();
+                const list = document.getElementById('orders-list');
+                
+                if (orders.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No orders found.</div>';
+                    return;
+                }
+
+                list.innerHTML = orders.map(order => `
+                    <div class="elite-card-detailed">
+                        <div class="elite-row">
+                            <span class="elite-label">Account:</span>
+                            <span class="elite-value">${order.email}</span>
+                        </div>
+                        <div class="elite-row">
+                            <span class="elite-label">Password:</span>
+                            <span class="elite-value" onclick="copyText('${order.password}')" style="color: var(--accent-blue); cursor: pointer;">
+                                ${order.password} <i class="fas fa-copy" style="font-size: 0.7rem; margin-left: 5px;"></i>
+                            </span>
+                        </div>
+                        <div class="elite-row">
+                            <span class="elite-label" style="--elite-label-width: 80px;">Paid:</span>
+                            <span class="elite-value" style="color: var(--success);">$${order.price_paid}</span>
+                        </div>
+                        <div class="elite-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 10px;">
+                            <span class="elite-value" style="font-size: 0.75rem; color: var(--text-secondary);">
+                                <i class="far fa-calendar-alt" style="margin-right: 5px;"></i> 
+                                ${new Date(order.purchased_at).toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('orders-list').innerHTML = '<div style="color: var(--danger);">Error loading orders.</div>';
+            }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                // Optional: show a mini toast/alert
+            });
+        }
+
+        loadOrders();
+    </script>
+
+    <style>
+        /* Small override for label width on this page */
+        :root { --elite-label-width: 80px; }
+        .elite-card-detailed { margin-bottom: 12px; }
+    </style>
+</body>
+</html>

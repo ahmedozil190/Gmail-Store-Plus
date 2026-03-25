@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Wallet - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.3">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.3">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <a href="/static/index.html" class="page-title-back">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span>Wallet</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Balance Card -->
+            <div class="glass-card balance-card">
+                <div class="balance-label">Available Balance</div>
+                <div class="balance-amount"><span id="balance">0.00</span> <span class="currency">$</span></div>
+            </div>
+
+            <div class="elite-section-header">
+                <h3 class="elite-section-title">Top Up Balance</h3>
+            </div>
+
+            <div class="elite-grid">
+                <!-- Cryptomus Option -->
+                <div class="elite-card" id="cryptoBtn">
+                    <i class="fas fa-bitcoin-sign" style="color: #f59e0b;"></i>
+                    <div class="info">
+                        <span class="title">Cryptocurrency (Auto)</span>
+                        <span class="desc">Pay with USDT, BTC, ETH via Cryptomus.</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);"></i>
+                </div>
+
+                <!-- Manual Option -->
+                <div class="elite-card" id="manualBtn">
+                    <i class="fas fa-receipt" style="color: var(--accent-blue);"></i>
+                    <div class="info">
+                        <span class="title">Manual Deposit</span>
+                        <span class="desc">Send proof of transfer to admin.</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);"></i>
+                </div>
+            </div>
+
+            <div class="hero-subtitle" style="margin-top: 20px; text-align: center;">
+                Minimum deposit is $1.00
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = '#15161f';
+        tg.backgroundColor = '#0a0b10';
+
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+        }
+
+        async function loadBalance() {
+            try {
+                const response = await fetch(`/api/user_data?user_id=${user?.id}`);
+                const data = await response.json();
+                if (data.balance !== undefined) {
+                    document.getElementById('balance').innerText = data.balance.toFixed(2);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('cryptoBtn').onclick = () => {
+             tg.showPopup({
+                title: 'Crypto Deposit',
+                message: 'How much would you like to deposit?',
+                buttons: [
+                    {id: 'd5', type: 'default', text: '$5'},
+                    {id: 'd10', type: 'default', text: '$10'},
+                    {id: 'cancel', type: 'destructive', text: 'Cancel'}
+                ]
+            }, (id) => {
+                if(id !== 'cancel') {
+                    const amount = id === 'd5' ? 5 : 10;
+                    tg.sendData(JSON.stringify({action: 'deposit_crypto', amount: amount}));
+                    tg.close();
+                }
+            });
+        };
+
+        document.getElementById('manualBtn').onclick = () => {
+            tg.sendData(JSON.stringify({action: 'deposit_manual'}));
+            tg.close();
+        };
+
+        loadBalance();
+    </script>
+</body>
+</html>
