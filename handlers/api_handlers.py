@@ -77,6 +77,15 @@ async def get_shop_data(request):
         print(f"API Shop Error: {e}")
         return web.json_response({'error': str(e)}, status=500)
 
+async def get_user_deposits_api(request):
+    user_id = request.query.get('user_id')
+    if not user_id:
+        return web.json_response({'error': 'Missing user_id'}, status=400)
+    
+    from database import get_user_deposits
+    deposits = get_user_deposits(int(user_id))
+    return web.json_response(deposits)
+
 async def get_orders(request):
     user_id = request.query.get('user_id')
     if not user_id:
