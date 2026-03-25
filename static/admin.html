@@ -8,42 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .admin-stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .stat-card {
-            background: #232e3c;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-        .stat-card:active { transform: scale(0.98); }
-        .stat-icon {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-            color: var(--accent-blue);
-        }
-        .stat-label {
-            display: block;
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 6px;
-        }
-        .stat-value {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #fff;
-            font-family: 'Outfit', sans-serif;
-        }
         .admin-section-header {
             margin-top: 30px;
             margin-bottom: 15px;
@@ -83,13 +47,13 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="sidebar-menu">
-                <a href="/" class="menu-item"><i class="fas fa-home"></i> <span>Home</span></a>
-                <a href="/static/shop.html" class="menu-item"><i class="fas fa-shopping-cart"></i> <span>Shop</span></a>
-                <a href="/static/wallet.html" class="menu-item"><i class="fas fa-wallet"></i> <span>Wallet</span></a>
-                <a href="/static/orders.html" class="menu-item"><i class="fas fa-history"></i> <span>My Orders</span></a>
-                <a href="/static/help.html" class="menu-item"><i class="fas fa-question-circle"></i> <span>Help</span></a>
-                <a href="/static/admin.html" class="menu-item active"><i class="fas fa-user-shield"></i> <span>Admin</span></a>
+            <div class="sidebar-nav">
+                <a href="/" class="sidebar-item"><i class="fas fa-home"></i> <span>Home</span></a>
+                <a href="/static/shop.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> <span>Shop</span></a>
+                <a href="/static/wallet.html" class="sidebar-item"><i class="fas fa-wallet"></i> <span>Wallet</span></a>
+                <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-history"></i> <span>My Orders</span></a>
+                <a href="/static/help.html" class="sidebar-item"><i class="fas fa-question-circle"></i> <span>Help</span></a>
+                <a href="/static/admin.html" class="sidebar-item active"><i class="fas fa-user-shield"></i> <span>Admin</span></a>
             </div>
         </nav>
         <div class="sidebar-overlay" id="overlay"></div>
@@ -106,24 +70,24 @@
         </header>
 
         <main class="main-content">
-            <div class="admin-stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-users stat-icon"></i>
+            <!-- Consolidate Stats Card -->
+            <div class="glass-card stat-card-multi">
+                <div class="stat-row">
                     <span class="stat-label">Total Users</span>
-                    <span class="stat-value" id="stats-users">--</span>
+                    <span class="stat-value blue" id="stats-users">--</span>
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-money-bill-wave stat-icon" style="color: #10b981;"></i>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
                     <span class="stat-label">Total Balance</span>
-                    <span class="stat-value" id="stats-balance">--</span>
+                    <span class="stat-value green" id="stats-balance">--</span>
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-box-open stat-icon" style="color: #f59e0b;"></i>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
                     <span class="stat-label">In Stock</span>
-                    <span class="stat-value" id="stats-stock">--</span>
+                    <span class="stat-value orange" id="stats-stock">--</span>
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-shopping-bag stat-icon" style="color: #3b82f6;"></i>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
                     <span class="stat-label">Total Orders</span>
                     <span class="stat-value" id="stats-orders">--</span>
                 </div>
@@ -134,14 +98,15 @@
                 <h3>Advanced Metrics</h3>
             </div>
 
-            <div class="glass-card" style="padding: 20px; border-radius: 24px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                    <span style="color: var(--text-secondary);">Accounts Sold</span>
-                    <span id="stats-sold" style="font-weight: 700; color: #10b981;">--</span>
+            <div class="glass-card stat-card-multi">
+                <div class="stat-row">
+                    <span class="stat-label">Accounts Sold</span>
+                    <span id="stats-sold" class="stat-value green">--</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-secondary);">Pending Deposits</span>
-                    <span id="stats-pending" style="font-weight: 700; color: #ef4444;">--</span>
+                <div class="stat-divider"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Pending Deposits</span>
+                    <span id="stats-pending" class="stat-value" style="color: #ef4444;">--</span>
                 </div>
             </div>
             
