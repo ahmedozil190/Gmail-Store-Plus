@@ -208,9 +208,11 @@
                 const shopData = await shopRes.json();
                 const userData = await userRes.json();
 
-                unitPrice = shopData.price;
-                currentStock = shopData.stock;
-                userBalance = userData.balance;
+                unitPrice = parseFloat(shopData.price) || 0;
+                currentStock = parseInt(shopData.stock) || 0;
+                userBalance = parseFloat(userData.balance) || 0;
+
+                console.log(`Data Loaded: Price=${unitPrice}, Stock=${currentStock}, Balance=${userBalance}`);
 
                 document.getElementById('product-name').innerText = shopData.product_name || "Gmail Accounts";
                 document.getElementById('product-desc').innerText = shopData.product_desc || "High quality accounts.";
@@ -254,23 +256,27 @@
         };
 
         document.getElementById('buyBtn').onclick = () => {
-            const qty = parseInt(qtyInput.value);
+            const qty = parseInt(qtyInput.value) || 1;
             const totalVal = parseFloat((qty * unitPrice).toFixed(2));
             const totalStr = totalVal.toFixed(2);
             
+            console.log(`Buy Step 1: Qty=${qty}, Total=${totalVal}, Balance=${userBalance}, Stock=${currentStock}`);
+
             if (qty > currentStock) {
+                console.log("Showing Stock Error Modal");
                 showModal('Stock Error', `Sorry, only ${currentStock} accounts available.`, 'error', 'Close');
                 return;
             }
 
             if (totalVal > userBalance) {
+                console.log("Showing Balance Error Modal");
                 showModal('Balance Error', `Insufficient balance. You need $${totalStr} but you have $${userBalance.toFixed(2)}.`, 'error', 'Close');
                 return;
             }
 
+            console.log("Showing Confirm Modal");
             showModal('Confirm Purchase', `Buy ${qty} accounts for $${totalStr}?`, 'confirm', 'Buy Now', () => {
                 tg.sendData(JSON.stringify({action: 'buy', qty: qty}));
-                // tg.close(); // tg.sendData already closes the app
             });
         };
 
