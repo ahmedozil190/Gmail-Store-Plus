@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
 :root {
-    --bg-color: #060a16;
+    --bg-color: #030712; /* Darker black/navy */
+    --header-bg: #111827; /* Distinct header color */
     --sidebar-bg: #0f172a;
     --card-bg: #111827;
     --primary: #10b981; /* Green */
     --secondary: #3b82f6; /* Blue */
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
     --accent: #6366f1;
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -25,12 +26,11 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
-    direction: ltr; /* English */
+    direction: ltr;
 }
 
 .main-container {
-    padding: 16px;
-    padding-top: 20px;
+    padding-top: 0; /* Header takes top space */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -39,8 +39,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding: 10px 4px;
+    padding: 18px 20px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 500;
 }
 
 .menu-icon {
