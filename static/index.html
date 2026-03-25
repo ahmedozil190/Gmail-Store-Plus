@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=1.9">
+    <link rel="stylesheet" href="/static/style.css?v=2.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Main Container -->
     <div class="main-container">
         <!-- Header -->
         <div class="header">
@@ -17,7 +16,6 @@
             <div class="profile-circle" id="avatar">A</div>
         </div>
 
-        <!-- Scrollable Content -->
         <div class="content-wrapper">
             <!-- Stats Card -->
             <div class="card stats-card">
@@ -37,41 +35,40 @@
                 </div>
             </div>
 
-            <!-- Action Cards -->
-            <div class="card action-card">
-                <div class="action-icon-bg">
-                    <span class="action-icon">+</span>
-                </div>
-                <div class="action-info">
-                    <div class="action-title">New Task</div>
-                    <div class="action-desc">Start earning rewards</div>
+            <!-- Shop Section -->
+            <div id="products-list">
+                <!-- Product Card 1 -->
+                <div class="card action-card" onclick="buyOne()">
+                    <div class="action-icon-bg">
+                        <span class="action-icon">🛒</span>
+                    </div>
+                    <div class="action-info">
+                        <div class="action-title">Buy High Quality Gmails</div>
+                        <div class="action-desc">Price: $0.50 per account</div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Other Actions -->
             <div class="card action-card">
                 <div class="action-icon-bg">
                     <span class="action-icon">💼</span>
                 </div>
                 <div class="action-info">
-                    <div class="action-title">Wallet</div>
-                    <div class="action-desc">Manage your funds</div>
+                    <div class="action-title">My Orders</div>
+                    <div class="action-desc">Check your purchase history</div>
                 </div>
             </div>
 
             <div class="card action-card">
                 <div class="action-icon-bg">
-                    <span class="action-icon">👥</span>
+                    <span class="action-icon">🎧</span>
                 </div>
                 <div class="action-info">
-                    <div class="action-title">Referrals</div>
-                    <div class="action-desc">Invite and earn</div>
+                    <div class="action-title">Support</div>
+                    <div class="action-desc">Need help? Contact us</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            @Gmail_Store_Plus_Bot
         </div>
     </div>
 
@@ -95,10 +92,18 @@
                     document.getElementById('total-spent').innerText = `${(data.total_spent || 0).toFixed(2)} $`;
                     document.getElementById('pending').innerText = "0.00 $";
                 }
-            } catch (e) {
-                console.error("Fetch error:", e);
-            }
+            } catch (e) { console.error(e); }
         }
+
+        function buyOne() {
+            tg.showConfirm("Buy 1 Gmail account for $0.50?", (confirmed) => {
+                if (confirmed) {
+                    tg.sendData(JSON.stringify({action: 'buy', qty: 1}));
+                    tg.close();
+                }
+            });
+        }
+
         loadData();
     </script>
 </body>
