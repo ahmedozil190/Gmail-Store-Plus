@@ -132,32 +132,73 @@
             color: var(--text-secondary);
         }
 
-        .user-list-new { display: flex; flex-direction: column; gap: 8px; }
+        .user-list-new { display: flex; flex-direction: column; gap: 15px; }
         
-        .user-row {
+        .user-card-premium {
             background: #1a2230;
-            border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 18px;
-            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .user-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 12px;
         }
 
-        .user-row .name { font-weight: 700; color: #fff; font-size: 0.95rem; }
-        .user-row .status-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
+        .user-card-header .name { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .user-card-header .status-check {
+            width: 24px;
+            height: 24px;
             background: #10b981;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
         }
 
-        .user-row.banned-row .status-icon { background: #ef4444; }
+        .user-card-sub {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-card-sub .username { color: #3b82f6; font-size: 0.85rem; font-weight: 600; }
+        .user-card-sub .id { color: #64748b; font-size: 0.85rem; font-weight: 500; }
+
+        .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 15px 0; }
+        .dashed-divider { border-top: 1px dashed rgba(255,255,255,0.1); margin: 15px 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .stat-item .label { display: block; font-size: 0.65rem; color: #64748b; margin-bottom: 5px; font-weight: 600; }
+        .stat-item .value { font-size: 0.95rem; font-weight: 800; }
+        .stat-item.balance .value { color: #10b981; }
+        .stat-item.hold .value { color: #f59e0b; }
+        .stat-item.tasks .value { color: #a855f7; }
+
+        .withdrawn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 5px;
+        }
+
+        .withdrawn-row .label { font-size: 0.8rem; color: #64748b; font-weight: 600; }
+        .withdrawn-row .value { font-size: 1rem; font-weight: 800; color: #10b981; }
+
+        .user-card-premium.banned { border-color: rgba(239, 68, 68, 0.2); }
+        .user-card-premium.banned .status-check { background: #ef4444; }
     </style>
 </head>
 <body>
@@ -318,14 +359,48 @@
                 return;
             }
 
-            list.innerHTML = users.map(u => `
-                <div class="user-row ${u.status === 'banned' ? 'banned-row' : ''}">
-                    <span class="name">${u.full_name || u.username || 'User ' + u.user_id}</span>
-                    <div class="status-icon">
-                        <i class="fas ${u.status === 'banned' ? 'fa-times' : 'fa-check'}"></i>
+            list.innerHTML = users.map(u => {
+                const displayName = (u.full_name && u.full_name.trim().length > 0) ? u.full_name : (u.username || 'User ' + u.user_id);
+                return `
+                <div class="user-card-premium ${u.status === 'banned' ? 'banned' : ''}">
+                    <div class="user-card-header">
+                        <span class="name">${displayName}</span>
+                        <div class="status-check">
+                            <i class="fas ${u.status === 'banned' ? 'fa-times' : 'fa-check'}"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card-sub">
+                        <span class="username">@${u.username || 'no_user'}</span>
+                        <span class="id">ID: ${u.user_id}</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item balance">
+                            <span class="label">Balance</span>
+                            <span class="value">$${(u.balance || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="stat-item hold">
+                            <span class="label">Hold</span>
+                            <span class="value">$${(u.hold || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="stat-item tasks">
+                            <span class="label">Tasks</span>
+                            <span class="value">${u.tasks_count || 0}</span>
+                        </div>
+                    </div>
+
+                    <div class="dashed-divider"></div>
+
+                    <div class="withdrawn-row">
+                        <span class="label">Total Withdrawn:</span>
+                        <span class="value">$${(u.total_withdrawn || 0).toFixed(2)}</span>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         loadUsers();

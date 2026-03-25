@@ -23,12 +23,24 @@ def init_db():
             username        TEXT,
             full_name       TEXT,
             balance         REAL    DEFAULT 0,
+            hold            REAL    DEFAULT 0,
+            tasks_count     INTEGER DEFAULT 0,
+            total_withdrawn REAL    DEFAULT 0,
             join_date       TEXT,
             language        TEXT    DEFAULT 'ar',
             currency        TEXT    DEFAULT 'USD',
             status          TEXT    DEFAULT 'active'
         )
     """)
+
+    # Simple Migrations for existing database
+    columns = [c['name'] for c in cur.execute("PRAGMA table_info(users)").fetchall()]
+    if 'hold' not in columns:
+        cur.execute("ALTER TABLE users ADD COLUMN hold REAL DEFAULT 0")
+    if 'tasks_count' not in columns:
+        cur.execute("ALTER TABLE users ADD COLUMN tasks_count INTEGER DEFAULT 0")
+    if 'total_withdrawn' not in columns:
+        cur.execute("ALTER TABLE users ADD COLUMN total_withdrawn REAL DEFAULT 0")
 
     # Accounts Pool (The items for sale)
     cur.execute("""
