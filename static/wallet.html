@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>My Wallet - Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.8">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.8">
+    <link rel="stylesheet" href="/static/style.css?v=3.9">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -32,15 +32,18 @@
 </head>
 <body>
     <div class="app-container">
-        <header class="wa-header">
-            <div class="wa-avatar" id="avatar">A</div>
-            <div class="wa-info">
-                <div class="wa-username" id="userName">User</div>
-                <div class="wa-greeting">Manage your balance</div>
+        <!-- Header (Same as other pages) -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="hamburger-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span>Wallet</span>
+                <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
 
-        <main class="main-content" style="padding-top: 20px;">
+        <main class="main-content">
             <div class="glass-card balance-card">
                 <div class="balance-label">Total Balance</div>
                 <div class="balance-amount">$<span id="balance">0.00</span></div>
@@ -80,40 +83,46 @@
                 </div>
             </div>
         </main>
-
-        <nav class="bottom-nav">
-            <a href="/static/index.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="/static/shop.html" class="nav-item">
-                <i class="fas fa-shopping-bag"></i>
-                <span>Shop</span>
-            </a>
-            <a href="/static/wallet.html" class="nav-item active">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
-            </a>
-            <a href="/static/orders.html" class="nav-item">
-                <i class="fas fa-history"></i>
-                <span>Orders</span>
-            </a>
-            <a href="/static/help.html" class="nav-item">
-                <i class="fas fa-question-circle"></i>
-                <span>Help</span>
-            </a>
-        </nav>
+        <footer class="bot-footer">@GmailStore6346Bot</footer>
     </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-title">Gmail Store Plus</span>
+            <button class="sidebar-close" id="closeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/static/index.html" class="sidebar-item"><i class="fas fa-home"></i> Home</a>
+            <a href="/static/shop.html" class="sidebar-item"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> My Orders</a>
+            <a href="/static/wallet.html" class="sidebar-item active"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="/static/help.html" class="sidebar-item"><i class="fas fa-headset"></i> Help</a>
+        </nav>
+    </aside>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const user = tg.initDataUnsafe.user;
+        tg.headerColor = '#232e3c';
+        tg.backgroundColor = '#232e3c';
 
+        const user = tg.initDataUnsafe.user;
         if (user) {
-            document.getElementById('userName').innerText = user.first_name;
-            document.getElementById('avatar').innerText = user.first_name[0].toUpperCase();
+            document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
         }
+
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
+        closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadData() {
             try {
