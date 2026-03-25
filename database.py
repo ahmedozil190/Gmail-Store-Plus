@@ -310,6 +310,9 @@ def get_admin_stats():
             "pending_deposits": pending_deposits,
             "total_balance": round(total_balance, 2)
         }
+    finally:
+        con.close()
+
 def get_all_users():
     con = _conn()
     con.row_factory = sqlite3.Row
