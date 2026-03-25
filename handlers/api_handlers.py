@@ -93,9 +93,9 @@ async def get_user_deposits_api(request):
     if not user_id:
         return web.json_response({'error': 'Missing user_id'}, status=400)
     
-    from database import get_user_deposits
-    deposits = get_user_deposits(int(user_id))
-    return web.json_response(deposits)
+    from database import get_user_wallet_history
+    history = get_user_wallet_history(int(user_id))
+    return web.json_response(history)
 
 async def get_orders(request):
     user_id = request.query.get('user_id')
@@ -231,8 +231,15 @@ async def post_manual_deposit(request):
                 f.write(file_content)
             proof_url = f"/static/uploads/proofs/{local_filename}"
 
+        # Calculate EGP amount
+        rate = await get_live_rate()
+        egp_amount = round(float(amount) * rate, 2)
+
         from database import create_deposit_request
-        create_deposit_request(int(user_id), float(amount), 'Vodafone Cash', proof_url, sender_phone=sender_phone)
+        create_deposit_request(
+            int(user_id), float(amount), 'Vodafone Cash', proof_url, 
+            sender_phone=sender_phone, egp_amount=egp_amount, exchange_rate=rate
+        )
         
         return web.json_response({'success': True})
     except Exception as e:

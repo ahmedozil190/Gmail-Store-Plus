@@ -93,7 +93,16 @@ def init_db():
 
     # Migration: Add sender_phone column if it doesn't exist
     try:
-        cur.execute("ALTER TABLE deposits ADD COLUMN sender_phone TEXT")
+        cur.execute("ALTER TABLE deposits ADD COLUMN sender_phone TEXT DEFAULT ''")
+        con.commit()
+    except sqlite3.OperationalError:
+        pass
+    
+    # Migration: Add egp_amount and exchange_rate columns if they don't exist
+    try:
+        cur.execute("ALTER TABLE deposits ADD COLUMN egp_amount REAL DEFAULT 0.0")
+        cur.execute("ALTER TABLE deposits ADD COLUMN exchange_rate REAL DEFAULT 0.0")
+        con.commit()
     except sqlite3.OperationalError:
         pass
 
@@ -225,13 +234,13 @@ def purchase_account(user_id: int, account_id: int):
         con.close()
 
 # ── Deposit Helpers ───────────────────────────────────────────────────────────
-def create_deposit_request(user_id: int, amount: float, method: str, proof: str, sender_phone: str = ''):
+def create_deposit_request(user_id: int, amount: float, method: str, proof: str, sender_phone: str = '', egp_amount: float = 0.0, exchange_rate: float = 0.0):
     con = _conn()
     cur = con.cursor()
     cur.execute(
-        """INSERT INTO deposits (user_id, amount, method, proof_link, created_at, sender_phone)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (user_id, amount, method, proof, datetime.now().isoformat(), sender_phone)
+        """INSERT INTO deposits (user_id, amount, method, proof_link, created_at, sender_phone, egp_amount, exchange_rate)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, amount, method, proof, datetime.now().isoformat(), sender_phone, egp_amount, exchange_rate)
     )
     con.commit()
     dep_id = cur.lastrowid
@@ -377,10 +386,23 @@ def get_all_deposits():
     finally:
         con.close()
 
-def get_user_deposits(user_id: int):
+def get_user_wallet_history(user_id: int):
     con = _conn()
     con.row_factory = sqlite3.Row
     try:
-        return [dict(r) for r in con.execute("SELECT * FROM deposits WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()]
+        # Get Deposits
+        deposits = [dict(r) for r in con.execute("SELECT * FROM deposits WHERE user_id = ?", (user_id,)).fetchall()]
+        for d in deposits: d['type'] = 'deposit'
+        
+        # Get Orders
+        orders = [dict(r) for r in con.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,)).fetchall()]
+        for o in orders: o['type'] = 'purchase'
+        
+        # Combine and Sort
+        history = deposits + orders
+        history.sort(key=lambda x: x['created_at'], reverse=True)
+        return history
     finally:
         con.close()
+
+def get_user_deposits(user_id: int):

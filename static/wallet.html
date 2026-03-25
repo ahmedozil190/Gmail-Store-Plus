@@ -28,6 +28,8 @@
         .history-status.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
         .history-status.approved { background: rgba(16, 185, 129, 0.1); color: #10b981; }
         .history-status.rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .history-amount.neg { color: #ef4444; }
+        .history-amount.pos { color: #10b981; }
     </style>
 </head>
 <body>
@@ -148,6 +150,11 @@
 
             list.innerHTML = '';
             items.forEach(item => {
+                const isDeposit = item.type === 'deposit';
+                const method = isDeposit ? (item.method || 'Deposit') : 'Account Purchase';
+                const amountPrefix = isDeposit ? '+' : '-';
+                const amountClass = isDeposit ? 'pos' : 'neg';
+                
                 const date = new Date(item.created_at).toLocaleDateString('en-GB', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                 });
@@ -156,12 +163,12 @@
                 card.className = 'history-card';
                 card.innerHTML = `
                     <div class="history-info">
-                        <span class="history-method">${item.method}</span>
+                        <span class="history-method">${method}</span>
                         <span class="history-date">${date}</span>
                     </div>
                     <div class="history-right">
-                        <span class="history-amount">+$${item.amount.toFixed(2)}</span>
-                        <span class="history-status ${item.status}">${item.status}</span>
+                        <span class="history-amount ${amountClass}">${amountPrefix}$${item.amount.toFixed(2)}</span>
+                        ${isDeposit ? `<span class="history-status ${item.status}">${item.status}</span>` : '<span class="history-status approved">Success</span>'}
                     </div>
                 `;
                 list.appendChild(card);

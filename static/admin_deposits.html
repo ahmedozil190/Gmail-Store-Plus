@@ -252,7 +252,9 @@
                 return;
             }
 
-            list.innerHTML = deposits.map(d => `
+            list.innerHTML = deposits.map(d => {
+                const egpAmountHtml = d.egp_amount ? `<p><strong>EGP Amount:</strong> <span style="font-weight: bold; color: var(--accent-green);">${d.egp_amount} EGP</span></p>` : '';
+                return `
                 <div class="deposit-card-premium">
                     <div class="dep-header">
                         <span class="dep-amount">$${(d.amount || 0).toFixed(2)}</span>
@@ -261,6 +263,7 @@
                     <div class="dep-info">
                         <p><strong>User ID:</strong> ${d.user_id}</p>
                         <p><strong>Method:</strong> ${d.method || 'Manual'}</p>
+                        ${egpAmountHtml}
                         ${d.sender_phone ? `<p><strong>Sender Phone:</strong> ${d.sender_phone}</p>` : ''}
                         <p><strong>Date:</strong> ${new Date(d.created_at).toLocaleString()}</p>
                     </div>
@@ -282,7 +285,8 @@
                         </div>
                     ` : ''}
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function handleDeposit(depId, action) {
