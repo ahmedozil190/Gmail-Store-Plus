@@ -42,18 +42,28 @@
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <span class="sidebar-logo">Gmail Store Plus</span>
+                <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
                 <button class="close-sidebar" id="closeBtn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="sidebar-nav">
-                <a href="/" class="sidebar-item"><i class="fas fa-home"></i> <span>Home</span></a>
-                <a href="/static/shop.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> <span>Shop</span></a>
-                <a href="/static/wallet.html" class="sidebar-item"><i class="fas fa-wallet"></i> <span>Wallet</span></a>
-                <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-history"></i> <span>My Orders</span></a>
-                <a href="/static/help.html" class="sidebar-item"><i class="fas fa-question-circle"></i> <span>Help</span></a>
-                <a href="/static/admin.html" class="sidebar-item active"><i class="fas fa-user-shield"></i> <span>Admin</span></a>
+                <a href="/static/admin.html" class="sidebar-item active">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users-cog"></i> <span>Manage Users</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-box-open"></i> <span>Inventory</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
+                </a>
+                <div class="stat-divider" style="margin: 10px 0; opacity: 0.1;"></div>
+                <a href="/" class="sidebar-item" style="opacity: 0.7;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
+                </a>
             </div>
         </nav>
         <div class="sidebar-overlay" id="overlay"></div>
