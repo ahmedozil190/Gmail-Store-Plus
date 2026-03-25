@@ -59,6 +59,7 @@ async def admin_dashboard_handler(update: Update, context: ContextTypes.DEFAULT_
     lang = user['language'] if user else 'ar'
     s = STRINGS[lang]
     
+    stats = get_admin_stats()
     text = s['ADMIN_DASHBOARD_STATS'].format(**stats)
     text += f"\n\n🔗 <b>Direct Link:</b> {WEBAPP_URL}/static/admin.html"
     text += f"\n\n⚙️ <i>If the button below (Not Found), please check your WEBAPP_URL in Railway.</i>"
