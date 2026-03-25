@@ -71,6 +71,12 @@
                     <p id="loadingMsg">Loading users...</p>
                 </div>
             </div>
+
+            <!-- Debug Area -->
+            <div id="debugArea" style="margin-top: 20px; font-size: 10px; color: #888; background: #000; padding: 10px; border-radius: 10px; display: none;">
+                <h4>Raw Debug:</h4>
+                <pre id="rawJSON"></pre>
+            </div>
         </main>
     </div>
 
@@ -107,6 +113,15 @@
                 }
 
                 allUsers = Array.isArray(data) ? data : [];
+                
+                // Debugging
+                const debugArea = document.getElementById('debugArea');
+                const rawJSON = document.getElementById('rawJSON');
+                if (allUsers.length > 0) {
+                    debugArea.style.display = 'block';
+                    rawJSON.innerText = JSON.stringify(allUsers[0], null, 2);
+                }
+
                 renderUsers(allUsers);
             } catch (e) {
                 console.error(e);
