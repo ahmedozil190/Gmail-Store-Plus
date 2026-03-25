@@ -4,98 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=1.8">
+    <link rel="stylesheet" href="/static/style.css?v=1.9">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Sidebar / Drawer -->
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-title">Gmail Store Plus</span>
-            <div class="close-btn" onclick="toggleSidebar()">✕</div>
-        </div>
-        <div class="sidebar-items">
-            <div class="sidebar-item active" onclick="navigate('home')">
-                <span class="icon">🏠</span> Home
-            </div>
-            <div class="sidebar-item" onclick="navigate('products')">
-                <span class="icon">🛒</span> Products
-            </div>
-            <div class="sidebar-item" onclick="navigate('orders')">
-                <span class="icon">📜</span> My Orders
-            </div>
-            <div class="sidebar-item" onclick="navigate('deposit')">
-                <span class="icon">💳</span> Deposit
-            </div>
-            <div class="sidebar-item" onclick="navigate('support')">
-                <span class="icon">🎧</span> Support
-            </div>
-        </div>
-    </div>
-    <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
-    <!-- Main Content -->
+    <!-- Main Container -->
     <div class="main-container">
-        <!-- Header (Sticky) -->
-        <div class="header-v2">
-            <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <!-- Header -->
+        <div class="header">
+            <div class="menu-icon">☰</div>
             <div class="header-title">Home</div>
-            <div class="profile-circle" id="avatar">?</div>
+            <div class="profile-circle" id="avatar">A</div>
         </div>
 
-        <div style="padding: 16px;">
+        <!-- Scrollable Content -->
+        <div class="content-wrapper">
             <!-- Stats Card -->
-            <div class="stats-card-v2">
-            <div class="stat-row">
-                <span class="stat-label">Current Balance</span>
-                <span class="stat-val balance" id="balance">0.00$</span>
-            </div>
-            <div class="divider"></div>
-            <div class="stat-row">
-                <span class="stat-label">Total Spent</span>
-                <span class="stat-val withdrawn" id="total-spent">0.00$</span>
-            </div>
-        </div>
-
-        <!-- Section -->
-        <div class="section-header">
-            <div class="section-title">Available Products</div>
-            <div class="view-all">View All</div>
-        </div>
-
-        <div id="products-list">
-            <div class="product-card">
-                <div class="product-info">
-                    <h3>High Quality Gmail Accounts</h3>
-                    <p>Price: $0.50 per account</p>
+            <div class="card stats-card">
+                <div class="stat-row">
+                    <span class="stat-label">Current Balance</span>
+                    <span class="stat-value balance" id="balance">0.00 $</span>
                 </div>
-                <button class="action-btn" onclick="buyOne()">Buy</button>
+                <div class="divider"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Withdrawn</span>
+                    <span class="stat-value withdrawn" id="total-spent">0.00 $</span>
+                </div>
+                <div class="divider"></div>
+                <div class="stat-row">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value pending" id="pending">0.00 $</span>
+                </div>
             </div>
+
+            <!-- Action Cards -->
+            <div class="card action-card">
+                <div class="action-icon-bg">
+                    <span class="action-icon">+</span>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">New Task</div>
+                    <div class="action-desc">Start earning rewards</div>
+                </div>
+            </div>
+
+            <div class="card action-card">
+                <div class="action-icon-bg">
+                    <span class="action-icon">💼</span>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">Wallet</div>
+                    <div class="action-desc">Manage your funds</div>
+                </div>
+            </div>
+
+            <div class="card action-card">
+                <div class="action-icon-bg">
+                    <span class="action-icon">👥</span>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">Referrals</div>
+                    <div class="action-desc">Invite and earn</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            @Gmail_Store_Plus_Bot
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0f172a';
-        tg.backgroundColor = '#0f172a';
+        tg.headerColor = '#0a0b10';
+        tg.backgroundColor = '#0a0b10';
 
         const user = tg.initDataUnsafe.user;
         if (user) {
-            document.getElementById('avatar').innerText = (user.first_name || "?")[0].toUpperCase();
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('visible');
-        }
-
-        function navigate(page) {
-            toggleSidebar();
-            // Logic for navigation
-            console.log("Navigating to:", page);
+            document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
         }
 
         async function loadData() {
@@ -103,25 +91,15 @@
                 const response = await fetch(`/api/user_data?user_id=${user?.id}`);
                 const data = await response.json();
                 if (data.balance !== undefined) {
-                    document.getElementById('balance').innerText = `${data.balance.toFixed(2)}$`;
-                    document.getElementById('total-spent').innerText = `${(data.total_spent || 0).toFixed(2)}$`;
+                    document.getElementById('balance').innerText = `${data.balance.toFixed(2)} $`;
+                    document.getElementById('total-spent').innerText = `${(data.total_spent || 0).toFixed(2)} $`;
+                    document.getElementById('pending').innerText = "0.00 $";
                 }
             } catch (e) {
                 console.error("Fetch error:", e);
             }
         }
-
-        function buyOne() {
-            tg.showConfirm("Are you sure you want to buy 1 account for $0.50?", (confirmed) => {
-                if (confirmed) {
-                    tg.sendData(JSON.stringify({action: 'buy', qty: 1}));
-                    tg.close();
-                }
-            });
-        }
-
         loadData();
     </script>
-    </div> <!-- Close main padding -->
 </body>
 </html>
