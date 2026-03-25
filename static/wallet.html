@@ -127,24 +127,26 @@
         closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadData() {
-            try {
-                const userId = user?.id || 8741285999;
-                console.log("Loading data for user:", userId);
-                const [userRes, historyRes] = await Promise.all([
-                    fetch(`/api/user_data?user_id=${userId}`),
-                    fetch(`/api/user_deposits?user_id=${userId}`)
-                ]);
-                
-                const userData = await userRes.json();
-                console.log("User data:", userData);
-                document.getElementById('balance').innerText = (userData.balance || 0).toFixed(2);
+            const userId = user?.id || 8741285999;
+            console.log("Loading data for user:", userId);
 
-                const history = await historyRes.json();
-                console.log("History data:", history);
-                renderHistory(history);
-            } catch (e) {
-                console.error("Error loading wallet data:", e);
-            }
+            // Fetch User Data
+            fetch(`/api/user_data?user_id=${userId}`)
+                .then(res => res.json())
+                .then(userData => {
+                    console.log("User data:", userData);
+                    document.getElementById('balance').innerText = (userData.balance || 0).toFixed(2);
+                })
+                .catch(e => console.error("Error loading user data:", e));
+
+            // Fetch History Data
+            fetch(`/api/user_deposits?user_id=${userId}`)
+                .then(res => res.json())
+                .then(history => {
+                    console.log("History data:", history);
+                    renderHistory(history);
+                })
+                .catch(e => console.error("Error loading history data:", e));
         }
 
         function renderHistory(items) {

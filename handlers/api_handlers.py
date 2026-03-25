@@ -8,8 +8,6 @@ import asyncio
 import hashlib
 import base64
 from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL, DATA_DIR
-from database import DB_PATH
-import sqlite3
 
 _rate_cache = {"rate": 52.7, "last_updated": 0}
 
@@ -314,22 +312,12 @@ async def post_reject_deposit(request):
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)
 
-async def get_debug_deposits(request):
-    con = sqlite3.connect(DB_PATH) # From api_handlers context or just use local conn logic
-    con.row_factory = sqlite3.Row
-    try:
-        deps = [dict(r) for r in con.execute("SELECT * FROM deposits ORDER BY id DESC LIMIT 5").fetchall()]
-        return web.json_response(deps)
-    finally:
-        con.close()
-
 def setup_api(app, bot_app):
     app['bot_app'] = bot_app
     app.router.add_get('/api/user_data', get_user_data)
     app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)
     app.router.add_get('/api/user_deposits', get_user_deposits_api)
-    app.router.add_get('/api/debug_deps', get_debug_deposits)
     app.router.add_post('/api/manual_deposit', post_manual_deposit)
     app.router.add_post('/api/create_crypto_invoice', post_create_crypto_invoice)
     app.router.add_post('/api/cryptomus_webhook', cryptomus_webhook)

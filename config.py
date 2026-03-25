@@ -15,6 +15,7 @@ else:
 BOT_NAME = os.getenv("BOT_NAME", "Gmail Store Bot")
 SUPPORT_LINK = os.getenv("SUPPORT_LINK", "@A_M_E_15")
 WEBAPP_URL = os.getenv("WEBAPP_URL", "https://gmail-store-plus-production.up.railway.app").rstrip("/")
+VODAFONE_NUMBER = os.getenv("VODAFONE_NUMBER", "01140641198")
 BASE_CURRENCY = "USD"
 
 # ── Sale Settings ────────────────────────────────────────────────────────────
