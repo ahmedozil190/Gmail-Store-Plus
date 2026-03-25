@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap');
 
 :root {
     --bg-main: #0a0b10;
-    --bg-frame: #232e3c; /* Telegram system bars */
-    --header-bg: #15161f; /* Internal top bar */
+    --bg-frame: #232e3c;
+    --header-bg: #15161f;
     --bg-card: rgba(22, 24, 33, 0.7);
     --border-card: rgba(255, 255, 255, 0.08);
     --accent-blue: #60a5fa;
@@ -27,15 +27,20 @@
 }
 
 body {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-primary);
-    line-height: 1.5;
+    line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Background Gradients from Farmer Bot */
+h1, h2, h3, .sidebar-title, .page-title-inner span {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Background Gradients */
 body::before {
     content: '';
     position: fixed;
@@ -67,7 +72,7 @@ body::before {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: var(--header-bg); /* Use user's preferred header color */
+    background: var(--header-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-card);
@@ -93,13 +98,14 @@ body::before {
     left: 50%;
     transform: translateX(-50%);
     white-space: nowrap;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-primary);
+    letter-spacing: -0.5px;
 }
 
 .page-title-avatar {
-    width: 44px; /* Enlarged as requested */
+    width: 44px;
     height: 44px;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
     border-radius: 50%;
@@ -116,7 +122,7 @@ body::before {
     background: none;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.55rem; /* Enlarged as requested */
+    font-size: 1.6rem;
     font-weight: bold;
     cursor: pointer;
     padding: 8px;
@@ -125,7 +131,7 @@ body::before {
     justify-content: center;
 }
 
-/* Sidebar Overlay */
+/* Sidebar */
 .sidebar-overlay {
     position: fixed;
     inset: 0;
@@ -143,7 +149,6 @@ body::before {
     visibility: visible;
 }
 
-/* Sidebar */
 .sidebar {
     position: fixed;
     top: 0;
@@ -173,8 +178,8 @@ body::before {
 }
 
 .sidebar-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 800;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -185,7 +190,7 @@ body::before {
     background: none;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
     padding: 6px;
     display: flex;
@@ -193,23 +198,23 @@ body::before {
 }
 
 .sidebar-nav {
-    padding: 0.75rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .sidebar-item {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 16px;
-    border-radius: 14px;
+    padding: 14px 18px;
+    border-radius: 16px;
     text-decoration: none;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-item:hover {
@@ -218,47 +223,48 @@ body::before {
 }
 
 .sidebar-item.active {
-    background: rgba(96, 165, 250, 0.1);
+    background: rgba(96, 165, 250, 0.12);
     color: var(--accent-blue);
 }
 
 /* Glass Cards */
 .glass-card {
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-card);
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
-/* Multi-Row Stats Card - SM SMALLER TEXT */
+/* Multi-Row Stats Card */
 .stat-card-multi {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 18px 22px !important;
+    gap: 8px;
+    padding: 20px 24px !important;
 }
 
 .stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    padding: 8px 0;
 }
 
 .stat-label {
-    font-size: 0.85rem; /* Smaller font as requested */
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 .stat-value {
-    font-size: 1.15rem; /* Slightly smaller value */
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
     font-weight: 800;
 }
 
@@ -268,58 +274,109 @@ body::before {
 
 .stat-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
 }
 
-/* Elite Section */
-.elite-section-header {
-    margin-bottom: 1rem;
-}
-
-.elite-section-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-}
-
+/* Elite Grid & Cards */
 .elite-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .elite-card {
     background: var(--bg-card);
     border: 1px solid var(--border-card);
-    border-radius: 20px;
-    padding: 1.25rem;
+    border-radius: 22px;
+    padding: 1.4rem;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.4rem;
     text-decoration: none;
     color: #fff;
     cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .elite-card:active {
-    transform: scale(0.98);
-    background: rgba(255, 255, 255, 0.05);
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .elite-card i {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: var(--accent-blue);
-    width: 24px;
+    width: 28px;
     text-align: center;
 }
 
 .elite-card .title {
     display: block;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
+    margin-bottom: 2px;
 }
 
 .elite-card .desc {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Hero Action Card (Help Page) */
+.hero-action-card {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(168, 85, 247, 0.1));
+    border: 1px solid var(--border-card);
+    border-radius: 30px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.hero-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background: var(--header-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 24px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--accent-blue);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 8px 25px rgba(96, 165, 250, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.btn-hero:active {
+    transform: scale(0.95);
 }

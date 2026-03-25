@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Support - Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.4">
-    <link rel="stylesheet" href="/static/webapp.css?v=3.4">
+    <title>Help - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.5">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -17,7 +17,7 @@
                 <button class="hamburger-btn" id="menuBtn">
                     <i class="fas fa-bars"></i>
                 </button>
-                <span>Support</span>
+                <span>Help</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
@@ -28,38 +28,16 @@
                     <i class="fas fa-headset"></i>
                 </div>
                 <h2 class="hero-title">How can we help?</h2>
-                <p class="hero-subtitle">Our support team is available 24/7 to assist you with any issues.</p>
+                <p class="hero-subtitle">Our technical support team is available 24/7 to assist you via Telegram.</p>
                 <a href="#" onclick="tg.openTelegramLink('https://t.me/A_M_E_15'); return false;" class="btn-hero">
-                    <i class="fab fa-telegram-plane"></i> Message Support
+                    <i class="fab fa-telegram-plane"></i> Contact Support
                 </a>
             </div>
 
-            <div class="elite-section-header">
-                <h3 class="elite-section-title">Common Questions</h3>
-            </div>
-
-            <div class="elite-list">
-                <div class="elite-card-detailed">
-                    <div class="elite-row">
-                        <span class="elite-value" style="color: var(--accent-blue);">How long does it take to get accounts?</span>
-                    </div>
-                    <div class="elite-row">
-                        <span class="elite-value" style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">
-                            Instantly! After purchase, accounts appear in the "My Orders" section.
-                        </span>
-                    </div>
-                </div>
-
-                <div class="elite-card-detailed" style="margin-top: 10px;">
-                    <div class="elite-row">
-                        <span class="elite-value" style="color: var(--accent-blue);">Is there a warranty?</span>
-                    </div>
-                    <div class="elite-row">
-                        <span class="elite-value" style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">
-                            Yes, we provide a 24-hour replacement warranty for invalid accounts.
-                        </span>
-                    </div>
-                </div>
+            <div style="text-align: center; padding: 20px;">
+                <p style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">
+                    Response time usually under 1 hour.
+                </p>
             </div>
         </main>
     </div>
@@ -77,7 +55,7 @@
             <a href="/static/index.html" class="sidebar-item"><i class="fas fa-home"></i> Home</a>
             <a href="/static/orders.html" class="sidebar-item"><i class="fas fa-shopping-cart"></i> My Orders</a>
             <a href="/static/wallet.html" class="sidebar-item"><i class="fas fa-wallet"></i> Wallet</a>
-            <a href="/static/support.html" class="sidebar-item active"><i class="fas fa-headset"></i> Support</a>
+            <a href="/static/help.html" class="sidebar-item active"><i class="fas fa-headset"></i> Help</a>
         </nav>
     </aside>
 
@@ -92,7 +70,6 @@
             document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
         }
 
-        // Sidebar Logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
         const menuBtn = document.getElementById('menuBtn');
@@ -101,9 +78,5 @@
         menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('open'); }
         closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
     </script>
-
-    <style>
-        .elite-card-detailed { padding: 15px 20px; }
-    </style>
 </body>
 </html>
