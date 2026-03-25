@@ -44,12 +44,12 @@
                     <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);"></i>
                 </div>
 
-                <!-- Manual Option -->
-                <div class="elite-card" id="manualBtn">
-                    <i class="fas fa-receipt" style="color: var(--accent-blue);"></i>
+                <!-- Vodafone Option -->
+                <div class="elite-card" id="vodafoneBtn">
+                    <i class="fas fa-mobile-screen-button" style="color: #ef4444;"></i>
                     <div class="info">
-                        <span class="title">Manual Deposit</span>
-                        <span class="desc">Send proof of transfer to admin.</span>
+                        <span class="title">Vodafone Cash</span>
+                        <span class="desc">Quick manual transfer with proof.</span>
                     </div>
                     <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; color: var(--text-secondary);"></i>
                 </div>
@@ -128,9 +128,8 @@
             });
         };
 
-        document.getElementById('manualBtn').onclick = () => {
-            tg.sendData(JSON.stringify({action: 'deposit_manual'}));
-            tg.close();
+        document.getElementById('vodafoneBtn').onclick = () => {
+            window.location.href = '/static/deposit_vodafone.html';
         };
 
         loadBalance();

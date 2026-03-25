@@ -4,76 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Deposits - Admin Console</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <link rel="stylesheet" href="/static/style.css?v=3.9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .deposit-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
+        :root {
+            --glass-bg: rgba(26, 34, 48, 0.85);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(12px);
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
         }
-        .deposit-card {
-            background: #232e3c;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
+
+        .deposit-list { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        
+        .deposit-card-premium {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 24px;
             padding: 20px;
+            backdrop-filter: var(--glass-blur);
         }
+
         .dep-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .dep-amount { font-size: 1.4rem; font-weight: 800; color: #10b981; font-family: 'Outfit', sans-serif; }
+
+        .dep-amount { font-size: 1.5rem; font-weight: 900; color: var(--accent-green); }
         .dep-status {
             padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
             text-transform: uppercase;
         }
+
         .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
         .status-approved { background: rgba(16, 185, 129, 0.1); color: #10b981; }
         .status-rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-        .dep-info {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-        }
-        .dep-info p { margin-bottom: 5px; }
-        .dep-proof {
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
+        .dep-info { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px; }
+        .dep-info p { margin-bottom: 6px; }
+        .dep-info strong { color: #fff; font-weight: 600; }
+
+        .btn-view-proof {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            padding: 8px 15px;
             border-radius: 12px;
-            margin: 10px 0;
-            font-family: monospace;
             font-size: 0.8rem;
-            word-break: break-all;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 15px;
+            text-decoration: none;
         }
-        .dep-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+
+        .dep-actions { display: flex; gap: 10px; }
         .action-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border-radius: 14px;
             border: none;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            transition: 0.2s;
         }
-        .btn-approve { background: #10b981; color: #fff; }
-        .btn-reject { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
-        .action-btn:active { transform: scale(0.96); }
+
+        .btn-approve { background: var(--accent-green); color: #fff; }
+        .btn-reject { background: rgba(255,255,255,0.05); color: #fff; }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
@@ -83,9 +92,7 @@
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
-                <button class="close-sidebar" id="closeBtn">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="close-sidebar" id="closeBtn"><i class="fas fa-times"></i></button>
             </div>
             <div class="sidebar-nav">
                 <a href="/admin_panel" class="sidebar-item">
@@ -107,13 +114,10 @@
         </nav>
         <div class="sidebar-overlay" id="overlay"></div>
 
-        <!-- Header -->
         <header class="page-title">
             <div class="page-title-inner">
-                <button class="hamburger-btn" id="menuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <span>Deposit Requests</span>
+                <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+                <span>Financial Requests</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
@@ -121,8 +125,7 @@
         <main class="main-content">
             <div class="deposit-list" id="depositList">
                 <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>Loading deposits...</p>
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
                 </div>
             </div>
         </main>
@@ -131,13 +134,8 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#232e3c';
-        tg.backgroundColor = '#232e3c';
-
         const adminUser = tg.initDataUnsafe.user;
-        if (adminUser) {
-            document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
-        }
+        if (adminUser) document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -149,36 +147,40 @@
 
         async function loadDeposits() {
             if (!adminUser || !adminUser.id) {
-                document.getElementById('depositList').innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">Waiting for Telegram...</div>`;
                 setTimeout(loadDeposits, 500);
                 return;
             }
             try {
                 const res = await fetch(`/api/admin_deposits?user_id=${adminUser.id}`);
-                const deposits = await res.json();
-                renderDeposits(deposits);
+                const data = await res.json();
+                renderDeposits(Array.isArray(data) ? data : []);
             } catch (e) { console.error(e); }
         }
 
         function renderDeposits(deposits) {
             const list = document.getElementById('depositList');
             if (deposits.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No deposit requests</div>';
+                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No requests found</div>';
                 return;
             }
 
             list.innerHTML = deposits.map(d => `
-                <div class="deposit-card">
+                <div class="deposit-card-premium">
                     <div class="dep-header">
-                        <span class="dep-amount">$${d.amount.toFixed(2)}</span>
+                        <span class="dep-amount">$${(d.amount || 0).toFixed(2)}</span>
                         <span class="dep-status status-${d.status}">${d.status}</span>
                     </div>
                     <div class="dep-info">
-                        <p><strong>User:</strong> ${d.user_id}</p>
+                        <p><strong>User ID:</strong> ${d.user_id}</p>
                         <p><strong>Method:</strong> ${d.method || 'Manual'}</p>
                         <p><strong>Date:</strong> ${new Date(d.created_at).toLocaleString()}</p>
                     </div>
-                    ${d.proof_data ? `<div class="dep-proof">Proof: ${d.proof_data}</div>` : ''}
+
+                    ${d.proof_link ? `
+                        <a href="${d.proof_link}" target="_blank" class="btn-view-proof">
+                            <i class="fas fa-image"></i> View Receipt
+                        </a>
+                    ` : ''}
                     
                     ${d.status === 'pending' ? `
                         <div class="dep-actions" id="actions-${d.id}">
@@ -195,6 +197,8 @@
         }
 
         async function handleDeposit(depId, action) {
+            if (!confirm(`Are you sure you want to ${action} this request?`)) return;
+            
             const btnContainer = document.getElementById(`actions-${depId}`);
             btnContainer.style.opacity = '0.5';
             btnContainer.querySelectorAll('button').forEach(b => b.disabled = true);
@@ -207,21 +211,20 @@
                     body: JSON.stringify({
                         admin_id: adminUser?.id,
                         dep_id: depId,
-                        reason: action === 'reject' ? 'Rejected via Admin Panel' : ''
+                        reason: action === 'reject' ? 'Manual screening' : ''
                     })
                 });
 
                 const result = await res.json();
                 if (result.success) {
                     tg.HapticFeedback.notificationOccurred('success');
-                    loadDeposits(); // Refresh list
+                    loadDeposits();
                 } else {
-                    alert('Error: ' + (result.error || 'Unknown error'));
+                    alert('Error: ' + result.error);
                     btnContainer.style.opacity = '1';
                     btnContainer.querySelectorAll('button').forEach(b => b.disabled = false);
                 }
             } catch (e) {
-                console.error(e);
                 alert('Connection error');
                 btnContainer.style.opacity = '1';
                 btnContainer.querySelectorAll('button').forEach(b => b.disabled = false);

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Vodafone Cash Deposit - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.4">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.4">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .deposit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .instruction-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .vodafone-number {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #ef4444;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            display: block;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-left: 5px;
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .file-upload-btn {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .file-upload-btn:hover { background: rgba(59, 130, 246, 0.15); }
+        .file-upload-btn i { font-size: 1.5rem; color: var(--accent-blue); margin-bottom: 10px; }
+        .file-upload-btn span { display: block; font-size: 0.85rem; color: var(--text-secondary); }
+
+        #imagePreview {
+            width: 100%;
+            border-radius: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .submit-btn {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span>Vodafone Cash</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="deposit-form">
+                <div class="instruction-card">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Transfer amount to:</span>
+                    <span class="vodafone-number">01012345678</span>
+                    <p style="font-size: 0.75rem; color: #ef4444; font-weight: 700;">* Min deposit $1.00</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Amount (USD)</label>
+                    <input type="number" id="amount" class="input-field" placeholder="Example: 5.00" step="0.01">
+                </div>
+
+                <div class="input-group">
+                    <label>Proof of Transfer (Screenshot)</label>
+                    <label for="imageInput" class="file-upload-btn">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span id="uploadStatus">Click to upload receipt</span>
+                    </label>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <img id="imagePreview" src="">
+                </div>
+
+                <button class="submit-btn" id="submitBtn">Submit Request</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe.user;
+        if (user) document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+
+        const imgInput = document.getElementById('imageInput');
+        const imgPreview = document.getElementById('imagePreview');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const submitBtn = document.getElementById('submitBtn');
+
+        imgInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    imgPreview.src = re.target.result;
+                    imgPreview.style.display = 'block';
+                    uploadStatus.innerText = 'File selected: ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        submitBtn.onclick = async () => {
+            const amount = document.getElementById('amount').value;
+            const file = imgInput.files[0];
+
+            if (!amount || amount < 1) {
+                tg.showAlert('Minimal deposit is $1.00');
+                return;
+            }
+            if (!file) {
+                tg.showAlert('Please upload proof of transfer');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting...';
+
+            const formData = new FormData();
+            formData.append('user_id', user.id);
+            formData.append('amount', amount);
+            formData.append('proof', file);
+
+            try {
+                const res = await fetch('/api/manual_deposit', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    tg.showPopup({
+                        title: 'Success!',
+                        message: 'Your request has been sent for review. Balance will be updated soon.',
+                        buttons: [{type: 'ok'}]
+                    }, () => {
+                        window.location.href = '/static/wallet.html';
+                    });
+                } else {
+                    tg.showAlert('Error: ' + result.error);
+                }
+            } catch (e) {
+                tg.showAlert('Connection failed. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit Request';
+            }
+        };
+    </script>
+</body>
+</html>
