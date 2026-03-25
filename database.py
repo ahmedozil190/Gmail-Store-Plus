@@ -317,7 +317,7 @@ def get_all_users():
     con = _conn()
     con.row_factory = sqlite3.Row
     try:
-        return [dict(r) for r in con.execute("SELECT * FROM users ORDER BY joined_at DESC").fetchall()]
+        return [dict(r) for r in con.execute("SELECT * FROM users ORDER BY join_date DESC").fetchall()]
     finally:
         con.close()
 

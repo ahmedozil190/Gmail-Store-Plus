@@ -179,7 +179,7 @@
                     </div>
                     <div class="user-meta">
                         <span class="user-balance">$${(u.balance || 0).toFixed(2)}</span>
-                        <span class="user-date">${new Date(u.joined_at).toLocaleDateString()}</span>
+                        <span class="user-date">${new Date(u.join_date || Date.now()).toLocaleDateString()}</span>
                     </div>
                 </div>
             `).join('');
