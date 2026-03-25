@@ -8,6 +8,64 @@
     <link rel="stylesheet" href="/static/webapp.css?v=3.6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-content {
+            background: #232e3c;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: all 0.3s;
+        }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .modal-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-confirm { background: var(--accent-blue); color: #fff; }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -51,6 +109,19 @@
         </main>
     </div>
 
+    <!-- Custom Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon"></div>
+            <div class="modal-title" id="modalTitle">Title</div>
+            <div class="modal-text" id="modalText">Message</div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="modalCancel">Cancel</button>
+                <button class="modal-btn btn-confirm" id="modalConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="overlay"></div>
     <aside class="sidebar" id="sidebar">
@@ -90,6 +161,42 @@
 
         let unitPrice = 0;
         let currentStock = 0;
+        let userBalance = 0;
+
+        // Modal Logic
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+
+        function showModal(title, text, type, confirmText, callback) {
+            modalTitle.innerText = title;
+            modalText.innerText = text;
+            modalConfirm.innerText = confirmText || 'OK';
+            
+            modalCancel.innerText = 'إلغاء';
+            if (type === 'error') {
+                modalIcon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: var(--warning);"></i>';
+                modalCancel.style.display = 'none';
+            } else if (type === 'confirm') {
+                modalIcon.innerHTML = '<i class="fas fa-question-circle" style="color: var(--accent-blue);"></i>';
+                modalCancel.style.display = 'block';
+            } else if (type === 'success') {
+                modalIcon.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i>';
+                modalCancel.style.display = 'none';
+            }
+
+            modalOverlay.classList.add('open');
+            modalConfirm.onclick = () => {
+                modalOverlay.classList.remove('open');
+                if (callback) callback();
+            };
+            modalCancel.onclick = () => {
+                modalOverlay.classList.remove('open');
+            };
+        }
 
         async function loadShopData() {
             try {
@@ -103,11 +210,11 @@
 
                 unitPrice = shopData.price;
                 currentStock = shopData.stock;
+                userBalance = userData.balance;
 
                 document.getElementById('product-name').innerText = shopData.product_name || "Gmail Accounts";
                 document.getElementById('product-desc').innerText = shopData.product_desc || "High quality accounts.";
                 document.getElementById('unit-price-label').innerText = `Price: $${unitPrice.toFixed(2)} / Account`;
-                
                 
                 const badge = document.getElementById('stock-badge');
                 badge.innerText = `${currentStock} In Stock`;
@@ -124,7 +231,6 @@
         function updateTotal() {
             let qty = parseInt(qtyInput.value) || 1;
             if (qty < 1) qty = 1;
-            if (currentStock > 0 && qty > currentStock) qty = currentStock;
             qtyInput.value = qty;
             
             const total = (qty * unitPrice).toFixed(2);
@@ -151,11 +257,19 @@
             const qty = parseInt(qtyInput.value);
             const total = (qty * unitPrice).toFixed(2);
             
-            tg.showConfirm(`Confirm purchase of ${qty} accounts for $${total}?`, (confirmed) => {
-                if(confirmed) {
-                    tg.sendData(JSON.stringify({action: 'buy', qty: qty}));
-                    tg.close();
-                }
+            if (qty > currentStock) {
+                showModal('خطأ في المخزن', `عذراً، يتوفر حالياً ${currentStock} حساباً فقط.`, 'error', 'إغلاق');
+                return;
+            }
+
+            if (total > userBalance) {
+                showModal('الرصيد غير كافٍ', `رصيدك الحالي هو $${userBalance.toFixed(2)}، بينما العملية تتطلب $${total}.`, 'error', 'إغلاق');
+                return;
+            }
+
+            showModal('تأكيد الشراء', `هل أنت متأكد من شراء ${qty} حساباً مقابل $${total}؟`, 'confirm', 'شراء الآن', () => {
+                tg.sendData(JSON.stringify({action: 'buy', qty: qty}));
+                tg.close();
             });
         };
 
