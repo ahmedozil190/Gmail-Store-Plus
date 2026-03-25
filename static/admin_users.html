@@ -172,9 +172,9 @@
 
             list.innerHTML = users.map(u => `
                 <div class="user-card">
-                    <div class="user-avatar">${(u.username || u.first_name || "?")[0].toUpperCase()}</div>
+                    <div class="user-avatar">${(u.username || u.full_name || "?")[0].toUpperCase()}</div>
                     <div class="user-info">
-                        <span class="user-name">${u.first_name || u.username || 'User'}</span>
+                        <span class="user-name">${u.full_name || u.username || 'User'}</span>
                         <span class="user-id">ID: ${u.user_id}</span>
                     </div>
                     <div class="user-meta">
