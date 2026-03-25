@@ -3,9 +3,9 @@ from datetime import datetime
 import os
 import secrets
 
-# Use absolute path to ensure both bot and dashboard use the same DB file
+# Use absolute path and allow override via environment variable for persistence (e.g., on Railway)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "store_database.db")
+DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, "store_database.db"))
 
 def _conn():
     c = sqlite3.connect(DB_PATH)
