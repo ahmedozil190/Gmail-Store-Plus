@@ -6,7 +6,7 @@ from strings import STRINGS
 from config import DEPOSIT_METHODS, DEPOSIT_INSTRUCTIONS, ADMIN_ID
 
 # Conversation states
-CHOOSING_METHOD, ENTERING_AMOUNT, SENDING_PROOF = range(3)
+CHOOSING_METHOD, ENTERING_AMOUNT, ENTERING_SENDER_PHONE, SENDING_PROOF = range(4)
 
 async def balance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -96,6 +96,31 @@ async def amount_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
     instr = DEPOSIT_INSTRUCTIONS.get(method, "")
     
+    if "Vodafone" in method:
+        await update.message.reply_text(
+            s['DEPOSIT_SENDER_PHONE_PROMPT'],
+            parse_mode='HTML'
+        )
+        return ENTERING_SENDER_PHONE
+    
+    await update.message.reply_text(
+        s['DEPOSIT_INSTRUCTIONS'].format(instructions=instr),
+        parse_mode='HTML'
+    )
+    return SENDING_PROOF
+
+async def sender_phone_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    phone = update.message.text
+    context.user_data['sender_phone'] = phone
+    
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    lang = user['language']
+    s = STRINGS[lang]
+    
+    method = context.user_data['dep_method']
+    instr = DEPOSIT_INSTRUCTIONS.get(method, "")
+    
     await update.message.reply_text(
         s['DEPOSIT_INSTRUCTIONS'].format(instructions=instr),
         parse_mode='HTML'
@@ -114,7 +139,8 @@ async def proof_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     amount = context.user_data['dep_amount']
     
     # Save to DB
-    dep_id = create_deposit_request(user_id, amount, method, proof)
+    sender_phone = context.user_data.get('sender_phone', '')
+    dep_id = create_deposit_request(user_id, amount, method, proof, sender_phone=sender_phone)
     
     # Notify User
     await update.message.reply_text(s['DEPOSIT_SUCCESS'], reply_markup=get_main_keyboard(lang))
@@ -128,6 +154,7 @@ async def proof_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     user=f"{user['full_name']} ({user_id})",
                     amount=amount,
                     method=method,
+                    sender_phone=sender_phone or "N/A",
                     proof=proof,
                     id=dep_id
                 ),
@@ -151,6 +178,7 @@ deposit_conv_handler = ConversationHandler(
     states={
         CHOOSING_METHOD: [CallbackQueryHandler(method_callback, pattern="^dep_method_")],
         ENTERING_AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, amount_handler)],
+        ENTERING_SENDER_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, sender_phone_handler)],
         SENDING_PROOF:   [MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, proof_handler)],
     },
     fallbacks=[MessageHandler(filters.Regex(f"^({STRINGS['ar']['BTN_BACK']}|{STRINGS['en']['BTN_BACK']})$"), cancel_deposit)],

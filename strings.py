@@ -21,6 +21,7 @@ STRINGS = {
         'DEPOSIT_TITLE': "💵 <b>شحن الرصيد</b>\n\n",
         'DEPOSIT_METHOD_PROMPT': "اختر طريقة الشحن المناسبة لك:",
         'DEPOSIT_AMOUNT_PROMPT': "✅ الطريقة: <b>{method}</b>\n\nأدخل المبلغ المراد شحنه بالدولار (مثال: 5):",
+        'DEPOSIT_SENDER_PHONE_PROMPT': "📱 أدخل رقم الهاتف الذي قمت بالتحويل منه (فودافون كاش):",
         'DEPOSIT_INSTRUCTIONS': "📝 <b>تعليمات الشحن:</b>\n\n{instructions}\n\nبعد التحويل، أرسل إثبات التحويل (رقم المعاملة أو صورة):",
         'DEPOSIT_SUCCESS': "✅ تم إرسال طلب الشحن بنجاح!\n\nسيتم مراجعة الطلب من قبل الإدارة وإضافة الرصيد فور التأكد.",
         
@@ -43,7 +44,7 @@ STRINGS = {
         
         # Admin
         'ADMIN_ONLY': "⛔ هذا الأمر للأدمن فقط.",
-        'ADMIN_NOTIFY_DEPOSIT': "🔔 <b>طلب إيداع جديد</b>\n\nالمستخدم: {user}\nالمبلغ: {amount}$\nالطريقة: {method}\nالإثبات: {proof}\n\nللقبول: /approve_dep {id}\nللرفض: /reject_dep {id} السبب",
+        'ADMIN_NOTIFY_DEPOSIT': "🔔 <b>طلب إيداع جديد</b>\n\nالمستخدم: {user}\nالمبلغ: {amount}$\nالطريقة: {method}\nالرقم المرسل منه: {sender_phone}\nالإثبات: {proof}\n\nللقبول: /approve_dep {id}\nللرفض: /reject_dep {id} السبب",
         'ADMIN_NOTIFY_BUY': "🛍 <b>عملية شراء جديدة</b>\n\nالمستخدم: {user}\nالحساب: {email}\nالسعر: {price}$",
         'ADMIN_HELP': (
             "🛠 <b>لوحة تحكم الأدمن</b>\n\n"
@@ -93,6 +94,7 @@ STRINGS = {
         'DEPOSIT_TITLE': "💵 <b>Top-up Balance</b>\n\n",
         'DEPOSIT_METHOD_PROMPT': "Choose your preferred payment method:",
         'DEPOSIT_AMOUNT_PROMPT': "✅ Method: <b>{method}</b>\n\nEnter the amount to top-up in USD (e.g., 5):",
+        'DEPOSIT_SENDER_PHONE_PROMPT': "📱 Enter the phone number you sent from (Vodafone Cash):",
         'DEPOSIT_INSTRUCTIONS': "📝 <b>Instructions:</b>\n\n{instructions}\n\nAfter transferring, send proof (Transaction ID or screenshot):",
         'DEPOSIT_SUCCESS': "✅ Top-up request submitted successfully!\n\nThe admin will review it and add the balance once confirmed.",
         
