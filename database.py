@@ -290,3 +290,25 @@ def purchase_bulk_accounts(user_id: int, quantity: int):
         return False, str(e)
     finally:
         con.close()
+def get_admin_stats():
+    con = _conn()
+    try:
+        total_users = con.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        total_accounts = con.execute("SELECT COUNT(*) FROM accounts_pool").fetchone()[0]
+        available_accounts = con.execute("SELECT COUNT(*) FROM accounts_pool WHERE status = 'available'").fetchone()[0]
+        sold_accounts = con.execute("SELECT COUNT(*) FROM accounts_pool WHERE status = 'sold'").fetchone()[0]
+        total_orders = con.execute("SELECT COUNT(*) FROM orders").fetchone()[0]
+        pending_deposits = con.execute("SELECT COUNT(*) FROM deposits WHERE status = 'pending'").fetchone()[0]
+        total_balance = con.execute("SELECT SUM(balance) FROM users").fetchone()[0] or 0
+        
+        return {
+            "total_users": total_users,
+            "total_accounts": total_accounts,
+            "available_accounts": available_accounts,
+            "sold_accounts": sold_accounts,
+            "total_orders": total_orders,
+            "pending_deposits": pending_deposits,
+            "total_balance": round(total_balance, 2)
+        }
+    finally:
+        con.close()

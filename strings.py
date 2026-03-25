@@ -59,6 +59,16 @@ STRINGS = {
             "لرفض الطلب مع إعلام المستخدم بالسبب.\n\n"
             "💡 ستصلك إشعارات تلقائية عند كل عملية إيداع أو شراء جديدة."
         ),
+        'ADMIN_DASHBOARD_STATS': (
+            "📊 <b>Admin Dashboard</b>\n"
+            "──────────────────\n"
+            "👥 Total Users: <b>{total_users}</b>\n"
+            "💰 Total Balance: <b>{total_balance}$</b>\n"
+            "📦 Total Accounts: <b>{total_accounts}</b> (<b>{available_accounts}</b> Avail.)\n"
+            "🛒 Total Orders: <b>{total_orders}</b>\n"
+            "⏳ Pending Deposits: <b>{pending_deposits}</b>"
+        ),
+        'BTN_ADMIN_PANEL': "🔗 Open Admin Panel",
         'SHOP_BULK_TITLE': "🛍 <b>شراء حسابات بالجملة</b>\n\nاختر الكمية المطلوبة من القائمة أدناه:",
         'BTN_PAY_TOTAL_1': "📕 ادفع {price}$ لـ {qty} حساب",
         'BTN_PAY_TOTAL_N': "📕 ادفع ({price}$) * {qty} حساب = {total}$",
@@ -122,5 +132,15 @@ STRINGS = {
         'SHOP_BULK_TITLE': "🛍 <b>Bulk Account Purchase</b>\n\nSelect the desired quantity from the list below:",
         'BTN_PAY_TOTAL_1': "📕 PAY {price}$ for {qty} account",
         'BTN_PAY_TOTAL_N': "📕 PAY ({price}$) * {qty} accounts = {total}$",
+        'ADMIN_DASHBOARD_STATS': (
+            "📊 <b>Admin Dashboard</b>\n"
+            "──────────────────\n"
+            "👥 Total Users: <b>{total_users}</b>\n"
+            "💰 Total Balance: <b>{total_balance}$</b>\n"
+            "📦 Total Accounts: <b>{total_accounts}</b> (<b>{available_accounts}</b> Avail.)\n"
+            "🛒 Total Orders: <b>{total_orders}</b>\n"
+            "⏳ Pending Deposits: <b>{pending_deposits}</b>"
+        ),
+        'BTN_ADMIN_PANEL': "🔗 Open Admin Panel",
     }
 }

@@ -8,7 +8,7 @@ from handlers.start import start_handler, language_callback_handler
 from handlers.settings import settings_handler, back_handler
 from handlers.balance import balance_handler, deposit_conv_handler
 from handlers.shop import shop_handler, purchase_callback_handler, my_orders_handler
-from handlers.admin import admin_help_handler, add_accounts_handler, approve_dep_handler, reject_dep_handler
+from handlers.admin import admin_help_handler, add_accounts_handler, approve_dep_handler, reject_dep_handler, admin_dashboard_handler
 from handlers.webhook_handler import setup_webhook
 from handlers.api_handlers import setup_api
 from handlers.help import help_handler
@@ -37,7 +37,8 @@ def main():
 
     # Command handlers
     app.add_handler(CommandHandler("start", start_handler))
-    app.add_handler(CommandHandler("admin", admin_help_handler))
+    app.add_handler(CommandHandler("admin", admin_dashboard_handler))
+    app.add_handler(CommandHandler("admin_help", admin_help_handler))
     app.add_handler(CommandHandler("add_accounts", add_accounts_handler))
     app.add_handler(CommandHandler("approve_dep", approve_dep_handler))
     app.add_handler(CommandHandler("reject_dep", reject_dep_handler))

@@ -1,7 +1,7 @@
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ContextTypes, CommandHandler
-from database import add_account_to_pool, approve_deposit, reject_deposit, get_user
-from config import ADMIN_ID, DEFAULT_ACCOUNT_PRICE
+from database import add_account_to_pool, approve_deposit, reject_deposit, get_user, get_admin_stats
+from config import ADMIN_ID, DEFAULT_ACCOUNT_PRICE, WEBAPP_URL
 from strings import STRINGS
 
 async def admin_help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -51,3 +51,20 @@ async def reject_dep_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     reject_deposit(dep_id, reason)
     await update.message.reply_text(f"🚫 Deposit #{dep_id} rejected. Reason: {reason}")
+
+async def admin_dashboard_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID: return
+    
+    user = get_user(update.effective_user.id)
+    lang = user['language'] if user else 'ar'
+    s = STRINGS[lang]
+    
+    stats = get_admin_stats()
+    text = s['ADMIN_DASHBOARD_STATS'].format(**stats)
+    
+    keyboard = [
+        [InlineKeyboardButton(s['BTN_ADMIN_PANEL'], web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin_panel"))]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(text, parse_mode='HTML', reply_markup=reply_markup)
