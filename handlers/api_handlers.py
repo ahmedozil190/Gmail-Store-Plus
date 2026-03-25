@@ -1,7 +1,7 @@
 from aiohttp import web
 import json
-from database import get_user, get_available_accounts_count, get_user_orders, get_next_available_account
-from config import DEFAULT_ACCOUNT_PRICE
+from database import get_user, get_available_accounts_count, get_user_orders, get_next_available_account, get_admin_stats
+from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
@@ -47,9 +47,16 @@ async def get_orders(request):
         return web.json_response({'error': 'Missing user_id'}, status=400)
     
     orders = get_user_orders(int(user_id))
-    return web.json_response([dict(o) for o in orders])
+async def get_admin_data(request):
+    user_id = request.query.get('user_id')
+    if not user_id or int(user_id) != ADMIN_ID:
+        return web.json_response({'error': 'Unauthorized'}, status=403)
+    
+    stats = get_admin_stats()
+    return web.json_response(stats)
 
 def setup_api(app):
     app.router.add_get('/api/user_data', get_user_data)
     app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)
+    app.router.add_get('/api/admin_stats', get_admin_data)

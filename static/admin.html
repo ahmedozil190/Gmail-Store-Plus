@@ -4,78 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css?v=1.8">
+    <link rel="stylesheet" href="/static/style.css?v=3.6">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .admin-grid {
+        .admin-stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 15px;
+            margin: 20px 0;
         }
-        .admin-card {
-            background: var(--card-bg);
-            padding: 18px;
+        .stat-card {
+            background: #232e3c;
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
-            border: 1px solid var(--glass-border);
+            padding: 20px;
             text-align: center;
+            transition: transform 0.2s;
         }
-        .admin-card h4 {
-            color: var(--secondary);
-            font-size: 0.8rem;
-            margin-bottom: 8px;
+        .stat-card:active { transform: scale(0.98); }
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-blue);
         }
-        .admin-card .val {
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            display: block;
             font-size: 1.4rem;
-            font-weight: 700;
-            color: #10b981;
+            font-weight: 800;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+        }
+        .admin-header {
+            background: #232e3c;
+            margin: -20px -20px 20px -20px;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        .admin-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
     </style>
 </head>
-<body>
-    <div class="header-v2">
-        <div class="header-title">Admin Panel</div>
-        <div class="status-badge" style="background: rgba(56, 189, 248, 0.1); color: var(--secondary); padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;">Admin Access</div>
-    </div>
+    <div class="app-container">
+        <header class="admin-header">
+            <h1 class="admin-title">Admin Dashboard</h1>
+            <p class="admin-subtitle">Real-time Bot Statistics</p>
+        </header>
 
-    <div class="admin-grid">
-        <div class="admin-card">
-            <h4>Total Users</h4>
-            <div class="val" id="users-count">0</div>
-        </div>
-        <div class="admin-card">
-            <h4>In Stock</h4>
-            <div class="val" id="acc-count">0</div>
-        </div>
-        <div class="admin-card">
-            <h4>Total Sales</h4>
-            <div class="val" id="total-sales">$0</div>
-        </div>
-        <div class="admin-card">
-            <h4>Pending Req.</h4>
-            <div class="val" id="pending-count">0</div>
-        </div>
-    </div>
+        <main class="main-content" style="padding: 0;">
+            <div class="admin-stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users stat-icon"></i>
+                    <span class="stat-label">Total Users</span>
+                    <span class="stat-value" id="stats-users">--</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-wallet stat-icon" style="color: var(--success);"></i>
+                    <span class="stat-label">Total Balance</span>
+                    <span class="stat-value" id="stats-balance">--</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-envelope stat-icon" style="color: var(--warning);"></i>
+                    <span class="stat-label">In Stock</span>
+                    <span class="stat-value" id="stats-stock">--</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart stat-icon" style="color: var(--accent-blue);"></i>
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value" id="stats-orders">--</span>
+                </div>
+            </div>
 
-    <div class="section-header">
-        <div class="section-title">Quick Management</div>
-    </div>
-    
-    <div id="deposit-requests">
-        <div style="text-align: center; color: var(--text-muted); padding: 30px; background: var(--card-bg); border-radius: 20px;">
-            No pending deposit requests.
-        </div>
+            <div class="glass-card" style="padding: 20px; border-radius: 24px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 1.1rem;"><i class="fas fa-bolt" style="color: var(--warning);"></i> Active Stats</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-secondary);">Accounts Sold</span>
+                    <span id="stats-sold" style="font-weight: 700;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">Pending Deposits</span>
+                    <span id="stats-pending" style="font-weight: 700; color: var(--warning);">--</span>
+                </div>
+            </div>
+            
+            <button class="btn-hero" onclick="location.reload()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px;">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </main>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0f172a';
+        tg.headerColor = '#232e3c';
+
+        const user = tg.initDataUnsafe.user;
 
         async function loadAdminStats() {
-            document.getElementById('users-count').innerText = "142";
-            document.getElementById('acc-count').innerText = "85";
-            document.getElementById('total-sales').innerText = "$542.5";
+            try {
+                const res = await fetch(`/api/admin_stats?user_id=${user?.id}`);
+                const stats = await res.json();
+
+                if (stats.error) {
+                    alert("Error: " + stats.error);
+                    return;
+                }
+
+                document.getElementById('stats-users').innerText = stats.total_users;
+                document.getElementById('stats-balance').innerText = `$${stats.total_balance.toFixed(2)}`;
+                document.getElementById('stats-stock').innerText = stats.available_accounts;
+                document.getElementById('stats-orders').innerText = stats.total_orders;
+                document.getElementById('stats-sold').innerText = stats.sold_accounts;
+                document.getElementById('stats-pending').innerText = stats.pending_deposits;
+
+                tg.HapticFeedback.notificationOccurred('success');
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         loadAdminStats();
