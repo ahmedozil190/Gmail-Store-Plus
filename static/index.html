@@ -2,84 +2,124 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Gmail Store Plus</title>
-    <link rel="stylesheet" href="/static/style.css?v=2.4">
+    <!-- Combined CSS from Farmer Bot -->
+    <link rel="stylesheet" href="/static/style.css?v=3.0">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="menu-icon">☰</div>
-            <div class="header-title">Home</div>
-            <div class="profile-circle" id="avatar">A</div>
-        </div>
+    <div class="app-container">
+        <!-- Header / Page Title -->
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="hamburger-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span>Home</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
 
-        <div class="content-wrapper">
-            <!-- Stats Card -->
-            <div class="card stats-card">
-                <div class="stat-row">
-                    <span class="stat-label">Current Balance</span>
-                    <span class="stat-value balance" id="balance">0.00 $</span>
+        <main class="main-content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="glass-card stat-card green">
+                    <span class="stat-title">Current Balance</span>
+                    <span class="stat-value" id="balance">0.00 $</span>
                 </div>
-                <div class="divider"></div>
-                <div class="stat-row">
-                    <span class="stat-label">Total Withdrawn</span>
-                    <span class="stat-value withdrawn" id="total-spent">0.00 $</span>
+                <div class="glass-card stat-card blue">
+                    <span class="stat-title">Total Spent</span>
+                    <span class="stat-value" id="total-spent">0.00 $</span>
                 </div>
-                <div class="divider"></div>
-                <div class="stat-row">
-                    <span class="stat-label">Pending</span>
-                    <span class="stat-value pending" id="pending">0.00 $</span>
-                </div>
+            </div>
+
+            <div class="glass-card stat-card amber" style="margin-top: -10px;">
+                <span class="stat-title">Pending</span>
+                <span class="stat-value" id="pending">0.00 $</span>
             </div>
 
             <!-- Shop Section -->
-            <div id="products-list">
-                <div class="card action-card" onclick="buyOne()">
-                    <div class="action-icon-bg">
-                        <span class="action-icon">🛒</span>
-                    </div>
-                    <div class="action-info">
-                        <div class="action-title">Buy High Quality Gmails</div>
-                        <div class="action-desc">Price: $0.50 per account</div>
+            <div class="elite-section-header">
+                <h3 class="elite-section-title">Available Products</h3>
+            </div>
+
+            <div id="products-list" class="elite-grid">
+                <!-- Product Card Styled like Elite Cards -->
+                <div class="elite-card" onclick="buyOne()">
+                    <i class="fas fa-envelope"></i>
+                    <div class="info">
+                        <span class="title">High Quality Gmail Accounts</span>
+                        <span class="desc">Fresh accounts with recovery email.</span>
+                        <div style="margin-top: 5px; font-weight: 800; color: var(--success);">$0.50 / Piece</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card action-card">
-                <div class="action-icon-bg">
-                    <span class="action-icon">💼</span>
+            <!-- Footer Actions -->
+            <div class="elite-grid" style="margin-top: 20px;">
+                <div class="elite-card">
+                    <i class="fas fa-history"></i>
+                    <div class="info">
+                        <span class="title">My Orders</span>
+                        <span class="desc">View your purchase history</span>
+                    </div>
                 </div>
-                <div class="action-info">
-                    <div class="action-title">My Orders</div>
-                    <div class="action-desc">Check your purchase history</div>
-                </div>
-            </div>
-
-            <div class="card action-card">
-                <div class="action-icon-bg">
-                    <span class="action-icon">🎧</span>
-                </div>
-                <div class="action-info">
-                    <div class="action-title">Support</div>
-                    <div class="action-desc">Need help? Contact us</div>
+                <div class="elite-card">
+                    <i class="fas fa-headset"></i>
+                    <div class="info">
+                        <span class="title">Contact Support</span>
+                        <span class="desc">24/7 Customer assistance</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
+
+    <!-- Sidebar / Drawer Structure from Farmer Bot -->
+    <div class="sidebar-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-title">Gmail Store Plus</span>
+            <button class="sidebar-close" id="closeBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="sidebar-item active"><i class="fas fa-home"></i> Home</a>
+            <a href="#" class="sidebar-item"><i class="fas fa-shopping-cart"></i> Store</a>
+            <a href="#" class="sidebar-item"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="#" class="sidebar-item"><i class="fas fa-info-circle"></i> About</a>
+        </nav>
+    </aside>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // Sync with Telegram Frame color
-        tg.headerColor = '#232e3c'; 
-        tg.backgroundColor = '#232e3c';
+        tg.headerColor = '#0a0b10';
+        tg.backgroundColor = '#0a0b10';
 
         const user = tg.initDataUnsafe.user;
         if (user) {
             document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+        }
+
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        menuBtn.onclick = () => {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        closeBtn.onclick = overlay.onclick = () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
         }
 
         async function loadData() {
@@ -95,7 +135,7 @@
         }
 
         function buyOne() {
-            tg.showConfirm("Buy 1 Gmail account for $0.50?", (confirmed) => {
+            tg.showConfirm("Buy 1 Gmail for $0.50?", (confirmed) => {
                 if (confirmed) {
                     tg.sendData(JSON.stringify({action: 'buy', qty: 1}));
                     tg.close();
