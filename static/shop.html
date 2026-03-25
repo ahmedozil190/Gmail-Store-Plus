@@ -262,15 +262,15 @@
             
             console.log(`Buy Step 1: Qty=${qty}, Total=${totalVal}, Balance=${userBalance}, Stock=${currentStock}`);
 
-            if (qty > currentStock) {
-                console.log("Showing Stock Error Modal");
-                showModal('Stock Error', `Sorry, only ${currentStock} accounts available.`, 'error', 'Close');
-                return;
-            }
-
             if (totalVal > userBalance) {
                 console.log("Showing Balance Error Modal");
                 showModal('Balance Error', `Insufficient balance. You need $${totalStr} but you have $${userBalance.toFixed(2)}.`, 'error', 'Close');
+                return;
+            }
+
+            if (qty > currentStock) {
+                console.log("Showing Stock Error Modal");
+                showModal('Stock Error', `Sorry, only ${currentStock} accounts available.`, 'error', 'Close');
                 return;
             }
 
