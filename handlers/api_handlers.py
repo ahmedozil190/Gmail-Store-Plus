@@ -48,51 +48,69 @@ async def get_orders(request):
     
     orders = get_user_orders(int(user_id))
 async def get_admin_data(request):
-    user_id = request.query.get('user_id')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    stats = get_admin_stats()
-    return web.json_response(stats)
+    try:
+        user_id = request.query.get('user_id')
+        if not user_id or not user_id.isdigit() or int(user_id) != ADMIN_ID:
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        stats = get_admin_stats()
+        return web.json_response(stats)
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def get_admin_users(request):
-    user_id = request.query.get('user_id')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    return web.json_response(get_all_users())
+    try:
+        user_id = request.query.get('user_id')
+        if not user_id or not user_id.isdigit() or int(user_id) != ADMIN_ID:
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        return web.json_response(get_all_users())
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def get_admin_accounts(request):
-    user_id = request.query.get('user_id')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    return web.json_response(get_all_accounts())
+    try:
+        user_id = request.query.get('user_id')
+        if not user_id or not user_id.isdigit() or int(user_id) != ADMIN_ID:
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        return web.json_response(get_all_accounts())
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def get_admin_deposits(request):
-    user_id = request.query.get('user_id')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    return web.json_response(get_all_deposits())
+    try:
+        user_id = request.query.get('user_id')
+        if not user_id or not user_id.isdigit() or int(user_id) != ADMIN_ID:
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        return web.json_response(get_all_deposits())
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def post_approve_deposit(request):
-    data = await request.json()
-    user_id = data.get('admin_id')
-    dep_id = data.get('dep_id')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    
-    if approve_deposit(int(dep_id)):
-        return web.json_response({'success': True})
-    return web.json_response({'error': 'Failed to approve'}, status=400)
+    try:
+        data = await request.json()
+        user_id = data.get('admin_id')
+        dep_id = data.get('dep_id')
+        if not user_id or str(user_id) != str(ADMIN_ID):
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        
+        if approve_deposit(int(dep_id)):
+            return web.json_response({'success': True})
+        return web.json_response({'error': 'Failed to approve'}, status=400)
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def post_reject_deposit(request):
-    data = await request.json()
-    user_id = data.get('admin_id')
-    dep_id = data.get('dep_id')
-    reason = data.get('reason', 'Rejected by admin')
-    if not user_id or int(user_id) != ADMIN_ID:
-        return web.json_response({'error': 'Unauthorized'}, status=403)
-    
-    reject_deposit(int(dep_id), reason)
-    return web.json_response({'success': True})
+    try:
+        data = await request.json()
+        user_id = data.get('admin_id')
+        dep_id = data.get('dep_id')
+        reason = data.get('reason', 'Rejected by admin')
+        if not user_id or str(user_id) != str(ADMIN_ID):
+            return web.json_response({'error': 'Unauthorized'}, status=403)
+        
+        reject_deposit(int(dep_id), reason)
+        return web.json_response({'success': True})
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 def setup_api(app):
     app.router.add_get('/api/user_data', get_user_data)

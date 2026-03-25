@@ -60,7 +60,7 @@
                 <a href="/admin_deposits" class="sidebar-item">
                     <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
                 </a>
-                <a href="/" class="sidebar-item" style="opacity: 0.7; margin-top: 10px;">
+                <a href="/" class="sidebar-item" style="opacity: 0.7;">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
                 </a>
             </div>
@@ -145,8 +145,12 @@
         closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadAdminStats() {
+            if (!user || !user.id) {
+                console.error("User ID not found yet.");
+                return;
+            }
             try {
-                const res = await fetch(`/api/admin_stats?user_id=${user?.id}`);
+                const res = await fetch(`/api/admin_stats?user_id=${user.id}`);
                 const stats = await res.json();
 
                 if (stats.error) {

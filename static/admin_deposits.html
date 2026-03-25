@@ -100,7 +100,7 @@
                 <a href="/admin_deposits" class="sidebar-item active">
                     <i class="fas fa-file-invoice-dollar"></i> <span>Deposits</span>
                 </a>
-                <a href="/" class="sidebar-item" style="opacity: 0.7; margin-top: 10px;">
+                <a href="/" class="sidebar-item" style="opacity: 0.7;">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Admin</span>
                 </a>
             </div>
@@ -148,8 +148,13 @@
         closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         async function loadDeposits() {
+            if (!adminUser || !adminUser.id) {
+                document.getElementById('depositList').innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">Waiting for Telegram...</div>`;
+                setTimeout(loadDeposits, 500);
+                return;
+            }
             try {
-                const res = await fetch(`/api/admin_deposits?user_id=${adminUser?.id}`);
+                const res = await fetch(`/api/admin_deposits?user_id=${adminUser.id}`);
                 const deposits = await res.json();
                 renderDeposits(deposits);
             } catch (e) { console.error(e); }
