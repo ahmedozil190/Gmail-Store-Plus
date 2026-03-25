@@ -8,55 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .search-container {
-            margin: 20px 0;
-            position: relative;
-        }
-        .search-input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 15px 15px 15px 45px;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-        }
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-        }
-        .user-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .user-card {
-            background: #232e3c;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            background: var(--accent-blue);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.2rem;
-        }
+        .search-container { margin: 20px 0; position: relative; }
+        .search-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px 15px 15px 45px; color: #fff; font-size: 0.95rem; outline: none; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+        .user-list { display: flex; flex-direction: column; gap: 12px; }
+        .user-card { background: #232e3c; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 45px; height: 45px; background: var(--accent-blue); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; }
         .user-info { flex: 1; }
         .user-name { display: block; font-weight: 700; margin-bottom: 2px; }
-        .user-id { font-size: 0.75rem; color: var(--text-secondary); }
+        .user-id-text { font-size: 0.75rem; color: var(--text-secondary); }
         .user-meta { text-align: right; }
         .user-balance { display: block; font-weight: 800; color: #10b981; font-family: 'Outfit', sans-serif; }
         .user-date { font-size: 0.7rem; color: var(--text-secondary); }
@@ -68,9 +28,7 @@
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
-                <button class="close-sidebar" id="closeBtn">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="close-sidebar" id="closeBtn"><i class="fas fa-times"></i></button>
             </div>
             <div class="sidebar-nav">
                 <a href="/admin_panel" class="sidebar-item">
@@ -95,10 +53,8 @@
         <!-- Header -->
         <header class="page-title">
             <div class="page-title-inner">
-                <button class="hamburger-btn" id="menuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <span>Users List</span>
+                <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+                <span>Users Pool</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
@@ -110,10 +66,9 @@
             </div>
 
             <div class="user-list" id="userList">
-                <!-- Users will be loaded here -->
                 <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
                     <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>Fetching users...</p>
+                    <p id="loadingMsg">Loading users...</p>
                 </div>
             </div>
         </main>
@@ -122,13 +77,8 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#232e3c';
-        tg.backgroundColor = '#232e3c';
-
         const adminUser = tg.initDataUnsafe.user;
-        if (adminUser) {
-            document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
-        }
+        if (adminUser) document.getElementById('avatar').innerText = (adminUser.first_name || "A")[0].toUpperCase();
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -142,13 +92,14 @@
 
         async function loadUsers() {
             if (!adminUser || !adminUser.id) {
-                document.getElementById('userList').innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">Waiting for Telegram...</div>`;
+                document.getElementById('loadingMsg').innerText = "Waiting for Telegram...";
                 setTimeout(loadUsers, 500);
                 return;
             }
             try {
                 const res = await fetch(`/api/admin_users?user_id=${adminUser.id}`);
                 const data = await res.json();
+                console.log("Admin Users Data Received:", data);
                 
                 if (data.error) {
                     document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Error: ${data.error}</div>`;
@@ -157,7 +108,7 @@
 
                 allUsers = Array.isArray(data) ? data : [];
                 renderUsers(allUsers);
-            } catch (e) { 
+            } catch (e) {
                 console.error(e);
                 document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Connection Failed</div>`;
             }
@@ -166,29 +117,33 @@
         function renderUsers(users) {
             const list = document.getElementById('userList');
             if (users.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No users found</div>';
+                list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No users found</div>`;
                 return;
             }
 
-            list.innerHTML = users.map(u => `
+            list.innerHTML = users.map(u => {
+                const displayName = u.full_name || u.username || 'Anonymous';
+                const avatarChar = displayName[0].toUpperCase();
+                return `
                 <div class="user-card">
-                    <div class="user-avatar">${(u.username || u.full_name || "?")[0].toUpperCase()}</div>
+                    <div class="user-avatar">${avatarChar}</div>
                     <div class="user-info">
-                        <span class="user-name">${u.full_name || u.username || 'User'}</span>
-                        <span class="user-id">ID: ${u.user_id}</span>
+                        <span class="user-name">${displayName}</span>
+                        <span class="user-id-text">ID: ${u.user_id}</span>
                     </div>
                     <div class="user-meta">
                         <span class="user-balance">$${(u.balance || 0).toFixed(2)}</span>
                         <span class="user-date">${new Date(u.join_date || Date.now()).toLocaleDateString()}</span>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         document.getElementById('userSearch').oninput = (e) => {
             const query = e.target.value.toLowerCase();
             const filtered = allUsers.filter(u => 
-                (u.first_name && u.first_name.toLowerCase().includes(query)) || 
+                (u.full_name && u.full_name.toLowerCase().includes(query)) || 
                 (u.username && u.username.toLowerCase().includes(query)) ||
                 u.user_id.toString().includes(query)
             );
