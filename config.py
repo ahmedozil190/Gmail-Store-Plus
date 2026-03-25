@@ -45,7 +45,9 @@ DEPOSIT_INSTRUCTIONS = {
     "🤖 Cryptomus (Crypto)": "سيتم توليد رابط دفع تلقائي لك. بمجرد الدفع سيتم تحديث الرصيد تلقائياً.",
 }
 
-# ── Cloudinary Settings ──────────────────────────────────────────────────────
-CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
-CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
-CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
+# ── Dynamic Storage (Railway Volume Support) ──────────────────────────────────
+# If /data exists (Railway Volume), use it. Otherwise use local directory.
+DATA_DIR = "/data" if os.path.exists("/data") else os.path.dirname(os.path.abspath(__file__))
+# Ensure common subdirectories exist in the data volume
+os.makedirs(os.path.join(DATA_DIR, "uploads", "proofs"), exist_ok=True)
+

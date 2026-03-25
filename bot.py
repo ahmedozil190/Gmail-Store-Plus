@@ -95,10 +95,18 @@ def main():
     setup_webhook(webhook_app, app)
     setup_api(webhook_app, app)
 
-    # Static files
+    # Static files mapping
+    from config import DATA_DIR
     static_path = os.path.join(os.path.dirname(__file__), 'static')
     if not os.path.exists(static_path): os.makedirs(static_path)
+    
+    # Map /static/ to local folder (for CSS/JS/HTML)
     webhook_app.router.add_static('/static/', static_path, name='static')
+    
+    # Map /static/uploads/ to the Persistent Volume (High Priority)
+    volume_uploads_path = os.path.join(DATA_DIR, 'static', 'uploads')
+    os.makedirs(volume_uploads_path, exist_ok=True)
+    webhook_app.router.add_static('/static/uploads/', volume_uploads_path, name='uploads_volume')
     
     async def serve_index(request): return web.FileResponse(os.path.join(static_path, 'index.html'))
     async def serve_admin(request): return web.FileResponse(os.path.join(static_path, 'admin.html'))

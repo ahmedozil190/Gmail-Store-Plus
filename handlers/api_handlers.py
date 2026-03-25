@@ -9,15 +9,7 @@ import aiohttp
 import asyncio
 import hashlib
 import base64
-from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
-
-# Cloudinary Config
-cloudinary.config(
-    cloud_name=CLOUDINARY_CLOUD_NAME,
-    api_key=CLOUDINARY_API_KEY,
-    api_secret=CLOUDINARY_API_SECRET,
-    secure=True
-)
+from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL, DATA_DIR
 
 _rate_cache = {"rate": 52.7, "last_updated": 0}
 
@@ -202,34 +194,19 @@ async def post_manual_deposit(request):
         if not user_id or not amount or not file_content:
             return web.json_response({'error': 'Missing required fields or file'}, status=400)
 
-        proof_url = None
-
-        # Upload to Cloudinary if configured
-        if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY:
-            try:
-                upload_result = await asyncio.to_thread(
-                    cloudinary.uploader.upload,
-                    file_content,
-                    folder="proofs",
-                    public_id=f"proof_{user_id}_{int(datetime.now().timestamp())}"
-                )
-                proof_url = upload_result.get("secure_url")
-            except Exception as e:
-                print(f"Cloudinary Upload Error: {e}")
-
-        # Fallback to local if Cloudinary not configured or failed
-        if not proof_url:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            uploads_dir = os.path.join(base_dir, 'static', 'uploads', 'proofs')
-            os.makedirs(uploads_dir, exist_ok=True)
-            
-            ext = filename.split('.')[-1] if filename and '.' in filename else 'jpg'
-            local_filename = f"proof_{user_id}_{int(datetime.now().timestamp())}.{ext}"
-            abs_file_path = os.path.join(uploads_dir, local_filename)
-            
-            with open(abs_file_path, 'wb') as f:
-                f.write(file_content)
-            proof_url = f"/static/uploads/proofs/{local_filename}"
+        # Save to Persistent Volume
+        uploads_dir = os.path.join(DATA_DIR, 'static', 'uploads', 'proofs')
+        os.makedirs(uploads_dir, exist_ok=True)
+        
+        ext = filename.split('.')[-1] if filename and '.' in filename else 'jpg'
+        local_filename = f"proof_{user_id}_{int(datetime.now().timestamp())}.{ext}"
+        abs_file_path = os.path.join(uploads_dir, local_filename)
+        
+        with open(abs_file_path, 'wb') as f:
+            f.write(file_content)
+        
+        # The URL remains logical /static/uploads/...
+        proof_url = f"/static/uploads/proofs/{local_filename}"
 
         # Calculate EGP amount
         rate = await get_live_rate()

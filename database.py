@@ -3,11 +3,28 @@ from datetime import datetime
 import os
 import secrets
 
-# Use absolute path and allow override via environment variable for persistence (e.g., on Railway)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, "store_database.db"))
+from config import DATA_DIR
+import shutil
+
+# Database path in the persistent volume
+DB_PATH = os.path.join(DATA_DIR, "store_database.db")
+
+# ── Migration: Move existing DB to Volume if needed ──────────────────────────
+def migrate_data():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    OLD_DB_PATH = os.path.join(BASE_DIR, "store_database.db")
+    
+    # If old DB exists but new one doesn't, copy it
+    if os.path.exists(OLD_DB_PATH) and not os.path.exists(DB_PATH):
+        try:
+            print(f"Migrating database to persistent volume: {DB_PATH}")
+            shutil.copy2(OLD_DB_PATH, DB_PATH)
+            # We don't delete the old one just in case, but the app will use the new one
+        except Exception as e:
+            print(f"Migration Error (DB): {e}")
 
 def _conn():
+    migrate_data() # Ensure data is moved before connecting
     c = sqlite3.connect(DB_PATH)
     c.row_factory = sqlite3.Row
     return c
