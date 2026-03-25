@@ -1,102 +1,168 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manage Users - Admin Console</title>
-    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <title>User Management - Admin Console</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .search-container {
-            margin: 20px 0;
-            position: relative;
+        :root {
+            --card-blue: #16243d;
+            --card-red: #2d1a1e;
+            --tab-bg: #1a2230;
+            --tab-active: #3b82f6;
+            --purple-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         }
 
-        .search-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 15px 15px 15px 45px;
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card-mini {
+            background: var(--nav-bg);
+            border: 1px solid var(--border-card);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-card-mini.total { border-color: rgba(59, 130, 246, 0.3); background: var(--card-blue); }
+        .stat-card-mini.banned { border-color: rgba(239, 68, 68, 0.3); background: var(--card-red); }
+
+        .stat-card-mini .label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-mini .value {
+            font-size: 1.5rem;
+            font-weight: 900;
             color: #fff;
-            font-size: 0.95rem;
+        }
+
+        .action-card {
+            background: #1a2230;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .tabs-container {
+            background: #111827;
+            border-radius: 14px;
+            display: flex;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-item.active {
+            background: var(--tab-active);
+            color: #fff;
+        }
+
+        .search-box-fancy {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input-fancy {
+            width: 100%;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 14px;
+            padding: 14px 15px;
+            color: #fff;
+            font-size: 0.9rem;
             outline: none;
         }
 
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-        }
-
-        .user-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .user-card {
-            background: #232e3c;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            background: var(--accent-blue);
+        .btn-find {
+            width: 100%;
+            background: var(--purple-grad);
+            border: none;
             border-radius: 14px;
+            padding: 14px;
+            color: #fff;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 1.2rem;
+            gap: 10px;
+            font-size: 1rem;
+            cursor: pointer;
         }
 
-        .user-info {
-            flex: 1;
+        .management-section { margin-top: 25px; }
+
+        .management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .user-name {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .user-id-text {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .user-meta {
-            text-align: right;
-        }
-
-        .user-balance {
-            display: block;
-            font-weight: 800;
-            color: #10b981;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .user-date {
+        .management-title { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .results-badge {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 0.7rem;
             color: var(--text-secondary);
         }
+
+        .user-list-new { display: flex; flex-direction: column; gap: 8px; }
+        
+        .user-row {
+            background: #1a2230;
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-row .name { font-weight: 700; color: #fff; font-size: 0.95rem; }
+        .user-row .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.6rem;
+        }
+
+        .user-row.banned-row .status-icon { background: #ef4444; }
     </style>
 </head>
-
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
+        <!-- Sidebar & Header (Same as others) -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-logo" style="color: var(--warning);">Admin Console</span>
@@ -122,25 +188,54 @@
         </nav>
         <div class="sidebar-overlay" id="overlay"></div>
 
-        <!-- Header -->
         <header class="page-title">
             <div class="page-title-inner">
                 <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
-                <span>Users Pool</span>
+                <span>User Pool</span>
                 <div class="page-title-avatar" id="avatar">A</div>
             </div>
         </header>
 
         <main class="main-content">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" id="userSearch" placeholder="Search by name or ID...">
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card-mini total">
+                    <span class="label">Total Users</span>
+                    <span class="value" id="totalUsersCount">0</span>
+                </div>
+                <div class="stat-card-mini banned">
+                    <span class="label">Banned</span>
+                    <span class="value" id="bannedUsersCount">0</span>
+                </div>
             </div>
 
-            <div class="user-list" id="userList">
-                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p id="loadingMsg">Loading users...</p>
+            <!-- Filters -->
+            <div class="action-card">
+                <div class="tabs-container">
+                    <div class="tab-item active" onclick="setTab('all', this)">All</div>
+                    <div class="tab-item" onclick="setTab('banned', this)">Banned</div>
+                </div>
+
+                <div class="search-box-fancy">
+                    <input type="text" class="search-input-fancy" id="userSearch" placeholder="Search users...">
+                </div>
+
+                <button class="btn-find" onclick="applySearch()">
+                    <i class="fas fa-search"></i> Find
+                </button>
+            </div>
+
+            <!-- Management Section -->
+            <div class="management-section">
+                <div class="management-header">
+                    <h2 class="management-title">User Management</h2>
+                    <span class="results-badge" id="resultsCount">0 results</span>
+                </div>
+
+                <div class="user-list-new" id="userList">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
                 </div>
             </div>
         </main>
@@ -161,69 +256,79 @@
         closeBtn.onclick = overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
         let allUsers = [];
+        let currentFilter = 'all';
 
         async function loadUsers() {
             if (!adminUser || !adminUser.id) {
-                document.getElementById('loadingMsg').innerText = "Waiting for Telegram...";
                 setTimeout(loadUsers, 500);
                 return;
             }
             try {
                 const res = await fetch(`/api/admin_users?user_id=${adminUser.id}`);
                 const data = await res.json();
-                console.log("Admin Users Data Received:", data);
-
+                
                 if (data.error) {
-                    document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Error: ${data.error}</div>`;
+                    document.getElementById('userList').innerHTML = `Error: ${data.error}`;
                     return;
                 }
 
                 allUsers = Array.isArray(data) ? data : [];
-                renderUsers(allUsers);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('userList').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 40px;">Connection Failed</div>`;
+                updateStats();
+                applySearch();
+            } catch (e) { console.error(e); }
+        }
+
+        function updateStats() {
+            document.getElementById('totalUsersCount').innerText = allUsers.length;
+            document.getElementById('bannedUsersCount').innerText = allUsers.filter(u => u.status === 'banned').length;
+        }
+
+        function setTab(filter, el) {
+            currentFilter = filter;
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            applySearch();
+        }
+
+        function applySearch() {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            let filtered = allUsers;
+
+            if (currentFilter === 'banned') {
+                filtered = filtered.filter(u => u.status === 'banned');
             }
+
+            if (query) {
+                filtered = filtered.filter(u => 
+                    (u.full_name && u.full_name.toLowerCase().includes(query)) ||
+                    (u.username && u.username.toLowerCase().includes(query)) ||
+                    u.user_id.toString().includes(query)
+                );
+            }
+
+            renderUsers(filtered);
         }
 
         function renderUsers(users) {
             const list = document.getElementById('userList');
+            document.getElementById('resultsCount').innerText = `${users.length} results`;
+
             if (users.length === 0) {
                 list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 40px;">No users found</div>`;
                 return;
             }
 
-            list.innerHTML = users.map(u => {
-                const displayName = (u.full_name && u.full_name.trim().length > 0) ? u.full_name : (u.username || 'User ' + u.user_id);
-                const avatarChar = displayName[0].toUpperCase();
-                return `
-                <div class="user-card">
-                    <div class="user-avatar">${avatarChar}</div>
-                    <div class="user-info">
-                        <span class="user-name">${displayName}</span>
-                        <span class="user-id-text">ID: ${u.user_id}</span>
-                    </div>
-                    <div class="user-meta">
-                        <span class="user-balance">$${(u.balance || 0).toFixed(2)}</span>
-                        <span class="user-date">${new Date(u.join_date || Date.now()).toLocaleDateString()}</span>
+            list.innerHTML = users.map(u => `
+                <div class="user-row ${u.status === 'banned' ? 'banned-row' : ''}">
+                    <span class="name">${u.full_name || u.username || 'User ' + u.user_id}</span>
+                    <div class="status-icon">
+                        <i class="fas ${u.status === 'banned' ? 'fa-times' : 'fa-check'}"></i>
                     </div>
                 </div>
-                `;
-            }).join('');
-        }
-
-        document.getElementById('userSearch').oninput = (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(u =>
-                (u.full_name && u.full_name.toLowerCase().includes(query)) ||
-                (u.username && u.username.toLowerCase().includes(query)) ||
-                u.user_id.toString().includes(query)
-            );
-            renderUsers(filtered);
+            `).join('');
         }
 
         loadUsers();
     </script>
 </body>
-
 </html>
