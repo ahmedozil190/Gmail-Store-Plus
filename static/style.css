@@ -2,7 +2,8 @@
 
 :root {
     --bg-main: #0a0b10;
-    --bg-frame: #232e3c; /* Telegram header/footer color */
+    --bg-frame: #232e3c; /* Telegram system bars */
+    --header-bg: #15161f; /* Internal top bar */
     --bg-card: #14161f;
     --border-card: rgba(255, 255, 255, 0.05);
     --accent-blue: #60a5fa;
@@ -41,7 +42,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 12px 20px;
-    background: var(--bg-frame); /* Matching Telegram Frame */
+    background: var(--header-bg); /* Adjusted per user request */
     border-bottom: 1px solid var(--border-card);
     position: sticky;
     top: 0;
