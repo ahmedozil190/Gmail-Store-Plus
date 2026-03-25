@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Crypto Deposit - Gmail Store Plus</title>
+    <link rel="stylesheet" href="/static/style.css?v=3.6">
+    <link rel="stylesheet" href="/static/webapp.css?v=3.6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .crypto-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .promo-card {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 24px;
+            padding: 25px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(217, 119, 6, 0.2);
+        }
+
+        .promo-card i { font-size: 2.5rem; margin-bottom: 15px; display: block; }
+        .promo-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 5px; }
+        .promo-card p { font-size: 0.85rem; opacity: 0.9; }
+
+        .amount-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .amount-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .amount-btn.active {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .amount-btn .val { font-size: 1.2rem; font-weight: 900; color: #fff; display: block; }
+        .amount-btn .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
+
+        .custom-amount-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .pay-btn {
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 8px 16px rgba(245, 158, 11, 0.2);
+        }
+
+        .pay-btn:disabled { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="page-title">
+            <div class="page-title-inner">
+                <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+                <span>Crypto (Auto)</span>
+                <div class="page-title-avatar" id="avatar">A</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="crypto-container">
+                <div class="promo-card">
+                    <i class="fab fa-bitcoin"></i>
+                    <h3>Automatic Payment</h3>
+                    <p>USDT, BTC, ETH and 20+ coins. instant balance update.</p>
+                </div>
+
+                <div class="amount-grid">
+                    <div class="amount-btn" onclick="selectAmount(5, this)">
+                        <span class="val">$5</span>
+                        <span class="label">Starter</span>
+                    </div>
+                    <div class="amount-btn active" onclick="selectAmount(10, this)">
+                        <span class="val">$10</span>
+                        <span class="label">Popular</span>
+                    </div>
+                    <div class="amount-btn" onclick="selectAmount(20, this)">
+                        <span class="val">$20</span>
+                        <span class="label">Pro</span>
+                    </div>
+                    <div class="amount-btn" onclick="selectAmount(50, this)">
+                        <span class="val">$50</span>
+                        <span class="label">Whale</span>
+                    </div>
+                </div>
+
+                <input type="number" id="customAmount" class="custom-amount-input" placeholder="Or enter custom amount ($)">
+
+                <button class="pay-btn" id="payBtn" onclick="generateInvoice()">Pay with Cryptomus</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const user = tg.initDataUnsafe.user;
+        if (user) document.getElementById('avatar').innerText = (user.first_name || "A")[0].toUpperCase();
+
+        let selectedAmount = 10;
+
+        function selectAmount(val, el) {
+            selectedAmount = val;
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('customAmount').value = '';
+        }
+
+        const customInput = document.getElementById('customAmount');
+        customInput.oninput = () => {
+            if (customInput.value > 0) {
+                selectedAmount = parseFloat(customInput.value);
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            }
+        };
+
+        async function generateInvoice() {
+            const btn = document.getElementById('payBtn');
+            if (selectedAmount < 1) {
+                tg.showAlert('Minimum is $1.00');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Initializing...';
+
+            try {
+                const res = await fetch('/api/create_crypto_invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        amount: selectedAmount
+                    })
+                });
+                const data = await res.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    tg.showAlert('Error: ' + data.error);
+                }
+            } catch (e) {
+                tg.showAlert('Failed to connect to Cryptomus.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Pay with Cryptomus';
+            }
+        }
+    </script>
+</body>
+</html>

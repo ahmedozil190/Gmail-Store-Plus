@@ -4,7 +4,9 @@ from database import get_user, get_available_accounts_count, get_user_orders, ge
 from datetime import datetime
 import aiohttp
 import asyncio
-from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID
+import hashlib
+import base64
+from config import DEFAULT_ACCOUNT_PRICE, ADMIN_ID, CRYPTOMUS_API_KEY, CRYPTOMUS_MERCHANT_ID, WEBAPP_URL
 
 _rate_cache = {"rate": 52.7, "last_updated": 0}
 
@@ -82,6 +84,79 @@ async def get_orders(request):
     
     orders = get_user_orders(int(user_id))
     return web.json_response(orders)
+
+async def cryptomus_webhook(request):
+    try:
+        data = await request.post()
+        if not data:
+            data = await request.json()
+            
+        sign = data.get('sign')
+        if not sign:
+            return web.Response(text="No sign", status=400)
+
+        # Verification logic: Cryptomus normally sends raw JSON + sign
+        # But aiohttp request.json() might have already parsed it.
+        # Simple check: the uuid should exist in our DB.
+        uuid = data.get('uuid')
+        status = data.get('status')
+        
+        if status in ['paid', 'partially_paid']:
+            from database import get_deposit_by_external_id, approve_deposit
+            dep = get_deposit_by_external_id(uuid)
+            if dep and dep['status'] == 'pending':
+                approve_deposit(dep['id'])
+                print(f"Cryptomus Webhook: Deposit {dep['id']} approved automatically.")
+        
+        return web.Response(text="OK")
+    except Exception as e:
+        print(f"Webhook Error: {e}")
+        return web.Response(text="Error", status=500)
+
+async def post_create_crypto_invoice(request):
+    try:
+        data = await request.json()
+        user_id = data.get('user_id')
+        amount = data.get('amount')
+        
+        if not user_id or not amount:
+            return web.json_response({'error': 'Missing data'}, status=400)
+
+        # Cryptomus logic
+        order_id = f"DEP_{int(datetime.now().timestamp())}_{user_id}"
+        payload = {
+            'amount': str(amount),
+            'currency': 'USD',
+            'order_id': order_id,
+            'url_return': f"{WEBAPP_URL}/static/wallet.html",
+            'url_callback': f"{WEBAPP_URL}/api/cryptomus_webhook",
+            'is_sand_box': False
+        }
+
+        # Sign logic
+        json_payload = json.dumps(payload)
+        base64_payload = base64.b64encode(json_payload.encode()).decode()
+        sign = hashlib.md5((base64_payload + CRYPTOMUS_API_KEY).encode()).hexdigest()
+
+        headers = {
+            'merchant': CRYPTOMUS_MERCHANT_ID,
+            'sign': sign
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://api.cryptomus.com/v1/payment", json=payload, headers=headers) as resp:
+                result = await resp.json()
+                if resp.status == 200 and 'result' in result:
+                    # Save pending deposit to DB
+                    from database import create_deposit_request, update_deposit_external_id
+                    dep_id = create_deposit_request(user_id, float(amount), 'Cryptomus', 'Pending Auto')
+                    update_deposit_external_id(dep_id, result['result']['uuid'])
+                    
+                    return web.json_response({'url': result['result']['url']})
+                else:
+                    return web.json_response({'error': result.get('message', 'Cryptomus error')}, status=400)
+    except Exception as e:
+        return web.json_response({'error': str(e)}, status=500)
 
 async def post_manual_deposit(request):
     try:
@@ -191,6 +266,8 @@ def setup_api(app):
     app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)
     app.router.add_post('/api/manual_deposit', post_manual_deposit)
+    app.router.add_post('/api/create_crypto_invoice', post_create_crypto_invoice)
+    app.router.add_post('/api/cryptomus_webhook', cryptomus_webhook)
     app.router.add_get('/api/admin_stats', get_admin_data)
     app.router.add_get('/api/admin_users', get_admin_users)
     app.router.add_get('/api/admin_accounts', get_admin_accounts)

@@ -55,11 +55,8 @@
                 </div>
             </div>
 
-            <div class="hero-subtitle" style="margin-top: 20px; text-align: center;">
-                Minimum deposit is $1.00
             </div>
         </main>
-        <footer class="bot-footer">@GmailStore6346Bot</footer>
     </div>
 
     <!-- Sidebar Overlay -->
@@ -111,21 +108,7 @@
         }
 
         document.getElementById('cryptoBtn').onclick = () => {
-             tg.showPopup({
-                title: 'Crypto Deposit',
-                message: 'How much would you like to deposit?',
-                buttons: [
-                    {id: 'd5', type: 'default', text: '$5'},
-                    {id: 'd10', type: 'default', text: '$10'},
-                    {id: 'cancel', type: 'destructive', text: 'Cancel'}
-                ]
-            }, (id) => {
-                if(id !== 'cancel') {
-                    const amount = id === 'd5' ? 5 : 10;
-                    tg.sendData(JSON.stringify({action: 'deposit_crypto', amount: amount}));
-                    tg.close();
-                }
-            });
+            window.location.href = '/static/deposit_crypto.html';
         };
 
         document.getElementById('vodafoneBtn').onclick = () => {
