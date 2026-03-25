@@ -61,6 +61,7 @@ async def admin_dashboard_handler(update: Update, context: ContextTypes.DEFAULT_
     
     stats = get_admin_stats()
     text = s['ADMIN_DASHBOARD_STATS'].format(**stats)
+    text += f"\n\n🌐 Current URL: <code>{WEBAPP_URL}</code>"
     
     keyboard = [
         [InlineKeyboardButton(s['BTN_ADMIN_PANEL'], web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin_panel"))]
