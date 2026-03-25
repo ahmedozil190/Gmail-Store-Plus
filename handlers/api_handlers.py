@@ -21,6 +21,21 @@ async def get_user_data(request):
         'total_accounts': len(orders)
     })
 
+async def get_shop_data(request):
+    count = get_available_accounts_count()
+    from database import get_next_available_account
+    from config import DEFAULT_ACCOUNT_PRICE
+    
+    next_acc = get_next_available_account()
+    price = next_acc['price'] if next_acc else DEFAULT_ACCOUNT_PRICE
+    
+    return web.json_response({
+        'stock': count,
+        'price': price,
+        'product_name': 'High Quality Gmail Accounts',
+        'product_desc': 'Fresh accounts with recovery email.'
+    })
+
 async def get_orders(request):
     user_id = request.query.get('user_id')
     if not user_id:
@@ -31,4 +46,5 @@ async def get_orders(request):
 
 def setup_api(app):
     app.router.add_get('/api/user_data', get_user_data)
+    app.router.add_get('/api/shop_data', get_shop_data)
     app.router.add_get('/api/orders', get_orders)
