@@ -16,11 +16,14 @@ async def get_user_data(request):
     orders = get_user_orders(int(user_id))
     total_spent = sum(o['price'] for o in orders)
     
+    from config import VODAFONE_NUMBER, EXCHANGE_RATE_EGP
     return web.json_response({
         'balance': user['balance'],
         'language': user['language'],
         'total_spent': total_spent,
-        'total_accounts': len(orders)
+        'total_accounts': len(orders),
+        'vodafone_number': VODAFONE_NUMBER,
+        'exchange_rate': EXCHANGE_RATE_EGP
     })
 
 async def get_shop_data(request):
