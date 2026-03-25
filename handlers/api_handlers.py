@@ -11,9 +11,13 @@ async def get_user_data(request):
     if not user:
         return web.json_response({'error': 'User not found'}, status=404)
         
+    orders = get_user_orders(int(user_id))
+    total_spent = sum(o['price'] for o in orders)
+    
     return web.json_response({
         'balance': user['balance'],
-        'language': user['language']
+        'language': user['language'],
+        'total_spent': total_spent
     })
 
 async def get_orders(request):
