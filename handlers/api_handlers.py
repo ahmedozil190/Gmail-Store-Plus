@@ -1,6 +1,7 @@
 from aiohttp import web
 import json
-from database import get_user, get_available_accounts_count, get_user_orders
+from database import get_user, get_available_accounts_count, get_user_orders, get_next_available_account
+from config import DEFAULT_ACCOUNT_PRICE
 
 async def get_user_data(request):
     user_id = request.query.get('user_id')
@@ -22,19 +23,23 @@ async def get_user_data(request):
     })
 
 async def get_shop_data(request):
-    count = get_available_accounts_count()
-    from database import get_next_available_account
-    from config import DEFAULT_ACCOUNT_PRICE
-    
-    next_acc = get_next_available_account()
-    price = next_acc['price'] if next_acc else DEFAULT_ACCOUNT_PRICE
-    
-    return web.json_response({
-        'stock': count,
-        'price': price,
-        'product_name': 'High Quality Gmail Accounts',
-        'product_desc': 'Fresh accounts with recovery email.'
-    })
+    try:
+        count = get_available_accounts_count()
+        next_acc = get_next_available_account()
+        price = next_acc['price'] if next_acc else DEFAULT_ACCOUNT_PRICE
+        
+        # Log to console for debugging
+        print(f"API Shop Request: Stock={count}, Price={price}")
+        
+        return web.json_response({
+            'stock': count,
+            'price': price,
+            'product_name': 'High Quality Gmail Accounts',
+            'product_desc': 'Available for immediate delivery.'
+        })
+    except Exception as e:
+        print(f"API Shop Error: {e}")
+        return web.json_response({'error': str(e)}, status=500)
 
 async def get_orders(request):
     user_id = request.query.get('user_id')

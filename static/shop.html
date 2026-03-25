@@ -39,9 +39,9 @@
                 <div class="shop-price-tag" id="total-price">--</div>
                 
                 <div class="qty-selector">
-                    <button class="qty-btn" id="minusBtn"><i class="fas fa-minus"></i></button>
+                    <button class="qty-btn" id="minusBtn"><i class="fas fa-minus-circle"></i></button>
                     <input type="number" class="qty-input" id="qtyInput" value="1" min="1">
-                    <button class="qty-btn" id="plusBtn"><i class="fas fa-plus"></i></button>
+                    <button class="qty-btn" id="plusBtn"><i class="fas fa-plus-circle"></i></button>
                 </div>
 
                 <button class="btn-hero" id="buyBtn">
@@ -147,21 +147,15 @@
         };
 
         document.getElementById('plusBtn').onclick = () => {
-            let val = parseInt(qtyInput.value);
-            if(val < currentStock) {
-                qtyInput.value = val + 1;
-                updateTotal();
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-            }
+            let val = parseInt(qtyInput.value) || 1;
+            qtyInput.value = val + 1;
+            updateTotal();
         };
 
         document.getElementById('minusBtn').onclick = () => {
-            let val = parseInt(qtyInput.value);
-            if(val > 1) {
-                qtyInput.value = val - 1;
-                updateTotal();
-            }
+            let val = parseInt(qtyInput.value) || 1;
+            qtyInput.value = val - 1;
+            updateTotal();
         };
 
         document.getElementById('buyBtn').onclick = () => {
